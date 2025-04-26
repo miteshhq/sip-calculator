@@ -3,7 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Retro SIP Calculator</title>
+  <!-- SEO Meta Tags -->
+<title>SIP Calculator - Calculate Your Investment Returns | by Mitesh</title>
+<meta name="description" content="Free SIP (Systematic Investment Plan) calculator to estimate returns on your mutual fund investments. Plan your financial future with our easy-to-use tool.">
+<meta name="keywords" content="SIP calculator, mutual fund calculator, investment calculator, systematic investment plan, financial planning, investment returns, wealth growth calculator">
+<meta name="author" content="Mitesh">
+<link rel="canonical" href="https://retro-sip-calculator.vercel.app/">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Facebook Meta Tags -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://retro-sip-calculator.vercel.app/">
+<meta property="og:title" content="SIP Calculator - Plan Your Investment Returns">
+<meta property="og:description" content="Calculate your mutual fund SIP returns instantly. Free tool to help plan your financial investments.">
+<meta property="og:image" content="https://retro-sip-calculator.vercel.app/images/sip-calculator-preview.jpg">
+
+<!-- Twitter Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://retro-sip-calculator.vercel.app/">
+<meta name="twitter:title" content="SIP Calculator - Plan Your Investment Returns">
+<meta name="twitter:description" content="Calculate your mutual fund SIP returns instantly. Free tool to help plan your financial investments.">
+<meta name="twitter:image" content="https://retro-sip-calculator.vercel.app/images/sip-calculator-preview.jpg">
+
+<!-- Mobile Meta Tags -->
+<meta name="application-name" content="SIP Calculator">
+<meta name="apple-mobile-web-app-title" content="SIP Calculator">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "SIP Calculator by Mitesh",
+  "description": "Free online calculator for Systematic Investment Plan (SIP) returns. Plan your financial future with our easy-to-use investment calculator.",
+  "url": "https://retro-sip-calculator.vercel.app/",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Mitesh"
+  }
+}
+</script>
+
+<!-- Performance Hints -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* Base styling with Solarized theme */
@@ -37,10 +90,38 @@
     th, td { border:1px solid #586e75; padding:0.4rem 0.6rem; text-align:center; }
     th { background:#eee8d5; color:#073642; }
     tbody tr:nth-child(even) { background:rgba(230,230,210,0.5); }
+    
+    /* Highlight row styling */
+    .highlight-row { background-color: #2aa19844 !important; font-weight: bold; }
+    
+    /* Info tooltip */
+    .info-tooltip { position: relative; display: inline-block; margin-left: 5px; }
+    .info-icon { cursor: pointer; color: #268bd2; font-weight: bold; }
+    .tooltip-text { 
+      visibility: hidden; 
+      width: 200px;
+      background-color: #073642;
+      color: #fdf6e3;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.75rem;
+    }
+    .info-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-  <h1>Retro SIP Calculator</h1>
+  <h1>Enhanced SIP Calculator</h1>
   
   <section class="controls">
     <div class="btn-group">
@@ -81,7 +162,17 @@
   <section class="table-container">
     <table id="dataTable">
       <thead>
-        <tr><th>Period</th><th>Invested</th><th>Return</th><th>Total</th><th>Cum. Invested</th><th>Cum. Gain</th></tr>
+        <tr>
+          <th>Period</th>
+          <th>Invested Amount</th>
+          <th>Period Return
+            <span class="info-tooltip">
+              <span class="info-icon">?</span>
+              <span class="tooltip-text">Returns earned only in this specific period</span>
+            </span>
+          </th>
+          <th>Total Value</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -194,24 +285,42 @@
       const r = annual / 100 / (mode === 'mo' ? 12 : 1); // Period rate
 
       // Arrays for data visualization
-      const labels = [], invSeries = [], retSeries = [];
+      const labels = [], invSeries = [], retSeries = [], periodRetSeries = [];
+      
+      // Variables to track portfolio value
+      let previousBalance = 0;
+      let firstHighlightFound = false;
       
       // Calculate values for each period
       for(let i = 1; i <= n; i++) {
-        // Calculate future value using SIP formula
-        const fv = P * ((Math.pow(1 + r, i) - 1) / r);
-        const invested = P * i;
-        const gain = fv - invested;
+        // Current period investment
+        const periodInvestment = P;
         
-        // Format period labels based on mode
+        // Calculate current balance with return (SIP formula)
+        const currentBalance = (previousBalance + periodInvestment) * (1 + r);
+        
+        // Calculate period-specific return (not cumulative)
+        const periodReturn = currentBalance - previousBalance - periodInvestment;
+        
+        // Total invested up to this period
+        const totalInvested = P * i;
+        
+        // Total gain up to this period
+        const totalGain = currentBalance - totalInvested;
+        
+        // Format period labels
         labels.push(mode === 'mo' ? i + ' mo' : i + ' yr');
-        invSeries.push(invested.toFixed(0));
-        retSeries.push(gain.toFixed(0));
+        invSeries.push(periodInvestment.toFixed(0));
+        retSeries.push(totalGain.toFixed(0));
+        periodRetSeries.push(periodReturn.toFixed(0));
+        
+        // Update previous balance for next iteration
+        previousBalance = currentBalance;
       }
       
       // Calculate final totals
       const totalInv = P * n;
-      const totalVal = P * ((Math.pow(1 + r, n) - 1) / r);
+      const totalVal = previousBalance;
       const totalGain = totalVal - totalInv;
       
       // Update result display
@@ -231,17 +340,38 @@
 
       // Update table
       tbody.innerHTML = '';
-      for(let i = 0; i < labels.length; i++) {
-        const inv = +invSeries[i], gain = +retSeries[i], tot = inv + gain;
+      previousBalance = 0;
+      firstHighlightFound = false;
+      
+      for(let i = 1; i <= n; i++) {
+        // Current period investment
+        const periodInvestment = P;
+        
+        // Calculate current balance with return
+        const currentBalance = (previousBalance + periodInvestment) * (1 + r);
+        
+        // Calculate period-specific return (not cumulative)
+        const periodReturn = currentBalance - previousBalance - periodInvestment;
+        
+        // Create table row
         const row = tbody.insertRow();
+        
+        // Highlight row if period return >= period investment
+        if (!firstHighlightFound && periodReturn >= periodInvestment) {
+          row.classList.add('highlight-row');
+          firstHighlightFound = true;
+        }
+        
+        // Add cells with formatted values
         [
-          labels[i], 
-          `₹${inv.toLocaleString('en-IN')}`, 
-          `₹${gain.toLocaleString('en-IN')}`, 
-          `₹${tot.toLocaleString('en-IN')}`, 
-          `₹${inv.toLocaleString('en-IN')}`, 
-          `₹${gain.toLocaleString('en-IN')}`
+          labels[i-1], 
+          `₹${periodInvestment.toLocaleString('en-IN')}`, 
+          `₹${periodReturn.toLocaleString('en-IN')}`, 
+          `₹${currentBalance.toLocaleString('en-IN')}`
         ].forEach(txt => row.insertCell().textContent = txt);
+        
+        // Update previous balance for next iteration
+        previousBalance = currentBalance;
       }
     }
     
