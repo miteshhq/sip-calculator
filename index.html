@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- SEO Meta Tags -->
-<title>SIP Calculator - Calculate Your Investment Returns | by Mitesh</title>
+  <title>SIP Calculator - Calculate Your Investment Returns | by Mitesh</title>
 <meta name="description" content="Free SIP (Systematic Investment Plan) calculator to estimate returns on your mutual fund investments. Plan your financial future with our easy-to-use tool.">
 <meta name="keywords" content="SIP calculator, mutual fund calculator, investment calculator, systematic investment plan, financial planning, investment returns, wealth growth calculator">
 <meta name="author" content="Mitesh">
@@ -64,15 +64,45 @@
     h1 { color:#b58900; margin:0 0 0.5rem; font-size:1.8rem; }
     section { width:100%; max-width:720px; }
     hr { width:100%; border:none; border-top:2px solid #b58900; margin:1.5rem 0; }
-    
+
     /* Form controls styling */
     .controls { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:0.8rem 1.2rem; align-items:end; }
     .controls label { font-size:0.85rem; color:#586e75; margin-bottom:0.2rem; }
     .controls input[type="number"] { width:100%; padding:0.3rem; font-size:1rem; border:1px solid #586e75; border-radius:3px; background:#eee8d5; color:#073642; }
-    .controls input[type="range"] { width:100%; height:5px; background:#586e75; border-radius:3px; }
-    .controls input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#2aa198; border:2px solid #073642; margin-top:-4.5px; transition:transform 0.1s; }
-    .controls input[type="range"]::-webkit-slider-thumb:hover { transform:scale(1.2); }
     
+    /* Improved range slider styling */
+    .controls input[type="range"] { 
+      width:100%; 
+      height:5px; 
+      background:#586e75; 
+      border-radius:3px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .controls input[type="range"]::-webkit-slider-thumb { 
+      -webkit-appearance:none; 
+      width:14px; 
+      height:14px; 
+      border-radius:50%; 
+      background:#2aa198; 
+      border:2px solid #073642; 
+      cursor: pointer;
+      transition:transform 0.1s; 
+    }
+    .controls input[type="range"]::-moz-range-thumb { 
+      width:14px; 
+      height:14px; 
+      border-radius:50%; 
+      background:#2aa198; 
+      border:2px solid #073642; 
+      cursor: pointer;
+      transition:transform 0.1s; 
+    }
+    .controls input[type="range"]::-webkit-slider-thumb:hover,
+    .controls input[type="range"]::-moz-range-thumb:hover { 
+      transform:scale(1.2); 
+    }
+
     /* Button group styling */
     .btn-group { grid-column:1 / -1; display:flex; gap:0.5rem; margin-bottom:0.5rem; }
     .btn-group button { flex:1; padding:0.5rem; border:1px solid #586e75; background:#eee8d5; color:#073642; cursor:pointer; font-size:0.95rem; border-radius:3px; transition:background 0.2s; }
@@ -90,39 +120,14 @@
     th, td { border:1px solid #586e75; padding:0.4rem 0.6rem; text-align:center; }
     th { background:#eee8d5; color:#073642; }
     tbody tr:nth-child(even) { background:rgba(230,230,210,0.5); }
-    
+
     /* Highlight row styling */
     .highlight-row { background-color: #2aa19844 !important; font-weight: bold; }
-    
-    /* Info tooltip */
-    .info-tooltip { position: relative; display: inline-block; margin-left: 5px; }
-    .info-icon { cursor: pointer; color: #268bd2; font-weight: bold; }
-    .tooltip-text { 
-      visibility: hidden; 
-      width: 200px;
-      background-color: #073642;
-      color: #fdf6e3;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -100px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      font-size: 0.75rem;
-    }
-    .info-tooltip:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
   </style>
 </head>
 <body>
-  <h1>Enhanced SIP Calculator</h1>
-  
+  <h1>Retro SIP Calculator</h1>
+
   <section class="controls">
     <div class="btn-group">
       <button id="btnMo" class="active">Monthly</button>
@@ -149,35 +154,31 @@
       Estimated Gain: ₹0
     </div>
   </section>
-  
+
   <hr />
-  
+
   <section class="charts">
     <canvas id="barChart"></canvas>
     <canvas id="pieChart"></canvas>
   </section>
-  
+
   <hr />
-  
+
   <section class="table-container">
     <table id="dataTable">
       <thead>
         <tr>
           <th>Period</th>
-          <th>Invested Amount</th>
-          <th>Period Return
-            <span class="info-tooltip">
-              <span class="info-icon">?</span>
-              <span class="tooltip-text">Returns earned only in this specific period</span>
-            </span>
-          </th>
+          <th>Period Amount</th>
+          <th>Cumulative Invested</th>
+          <th>Period Return</th>
           <th>Total Value</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
   </section>
-  
+
   <script>
     // Get all DOM elements
     const btnMo = document.getElementById('btnMo'), btnYr = document.getElementById('btnYr');
@@ -204,7 +205,7 @@
         plugins: { tooltip: { mode: 'index', intersect: false } } 
       }
     });
-    
+
     const pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
       type: 'pie', 
       data: { 
@@ -234,23 +235,23 @@
         countRng.max = 360; 
         countLabel.textContent = '# of Months'; 
         amountLabel.textContent = 'Amount per Month (₹)';
-        
+
         // Convert years to months
         const currentYears = parseInt(countNum.value);
         const newMonths = currentYears * 12;
         countNum.value = newMonths;
         countRng.value = newMonths;
-        
+
         // Convert yearly amount to monthly amount
         const yearlyAmount = parseInt(amtNum.value);
         const monthlyAmount = Math.round(yearlyAmount / 12);
         amtNum.value = monthlyAmount;
         amtRng.value = monthlyAmount;
-        
+
         calculate();
       }
     });
-    
+
     btnYr.addEventListener('click', () => { 
       if (mode !== 'yr') {
         mode = 'yr'; 
@@ -260,19 +261,19 @@
         countRng.max = 50; 
         countLabel.textContent = '# of Years'; 
         amountLabel.textContent = 'Amount per Year (₹)';
-        
+
         // Convert months to years
         const currentMonths = parseInt(countNum.value);
         const newYears = Math.ceil(currentMonths / 12);
         countNum.value = newYears;
         countRng.value = newYears;
-        
+
         // Convert monthly amount to yearly amount
         const monthlyAmount = parseInt(amtNum.value);
         const yearlyAmount = monthlyAmount * 12;
         amtNum.value = yearlyAmount;
         amtRng.value = yearlyAmount;
-        
+
         calculate();
       }
     });
@@ -286,95 +287,103 @@
 
       // Arrays for data visualization
       const labels = [], invSeries = [], retSeries = [], periodRetSeries = [];
-      
+
       // Variables to track portfolio value
       let previousBalance = 0;
       let firstHighlightFound = false;
-      
+
+      // SIP calculation formula:
+      // M × (((1 + r)^n - 1) / r) × (1 + r)
+      // where M is the periodic investment, r is the periodic rate, and n is the number of periods
+
       // Calculate values for each period
       for(let i = 1; i <= n; i++) {
         // Current period investment
         const periodInvestment = P;
-        
-        // Calculate current balance with return (SIP formula)
+
+        // Calculate current balance with return (compound interest on existing balance + new investment)
         const currentBalance = (previousBalance + periodInvestment) * (1 + r);
-        
+
         // Calculate period-specific return (not cumulative)
         const periodReturn = currentBalance - previousBalance - periodInvestment;
-        
+
         // Total invested up to this period
         const totalInvested = P * i;
-        
+
         // Total gain up to this period
         const totalGain = currentBalance - totalInvested;
-        
+
         // Format period labels
         labels.push(mode === 'mo' ? i + ' mo' : i + ' yr');
-        invSeries.push(periodInvestment.toFixed(0));
-        retSeries.push(totalGain.toFixed(0));
-        periodRetSeries.push(periodReturn.toFixed(0));
-        
+        invSeries.push(Math.floor(periodInvestment));
+        retSeries.push(Math.floor(totalGain));
+        periodRetSeries.push(Math.floor(periodReturn));
+
         // Update previous balance for next iteration
         previousBalance = currentBalance;
       }
-      
+
       // Calculate final totals
       const totalInv = P * n;
       const totalVal = previousBalance;
       const totalGain = totalVal - totalInv;
-      
-      // Update result display
-      resultDiv.innerHTML =
-        `Invested: ₹${totalInv.toLocaleString('en-IN')}<br>` +
-        `Estimated Value: ₹${totalVal.toLocaleString('en-IN')}<br>` +
-        `Estimated Gain: ₹${totalGain.toLocaleString('en-IN')}`;
 
-      // Update charts
+      // Update result display with integer values only
+      resultDiv.innerHTML =
+        `Invested: ₹${Math.floor(totalInv).toLocaleString('en-IN')}<br>` +
+        `Estimated Value: ₹${Math.floor(totalVal).toLocaleString('en-IN')}<br>` +
+        `Estimated Gain: ₹${Math.floor(totalGain).toLocaleString('en-IN')}`;
+
+      // Update charts with integer values
       bar.data.labels = labels;
       bar.data.datasets[0].data = invSeries;
       bar.data.datasets[1].data = retSeries;
       bar.update();
-      
-      pie.data.datasets[0].data = [totalInv.toFixed(0), totalGain.toFixed(0)];
+
+      pie.data.datasets[0].data = [Math.floor(totalInv), Math.floor(totalGain)];
       pie.update();
 
       // Update table
       tbody.innerHTML = '';
       previousBalance = 0;
       firstHighlightFound = false;
-      
+
       for(let i = 1; i <= n; i++) {
         // Current period investment
         const periodInvestment = P;
         
+        // Total invested up to this period
+        const cumulativeInvested = P * i;
+
         // Calculate current balance with return
         const currentBalance = (previousBalance + periodInvestment) * (1 + r);
-        
+
         // Calculate period-specific return (not cumulative)
         const periodReturn = currentBalance - previousBalance - periodInvestment;
-        
+
         // Create table row
         const row = tbody.insertRow();
-        
+
         // Highlight row if period return >= period investment
         if (!firstHighlightFound && periodReturn >= periodInvestment) {
           row.classList.add('highlight-row');
           firstHighlightFound = true;
         }
-        
-        // Add cells with formatted values
+
+        // Add cells with formatted integer values
         [
           labels[i-1], 
-          `₹${periodInvestment.toLocaleString('en-IN')}`, 
-          `₹${periodReturn.toLocaleString('en-IN')}`, 
-          `₹${currentBalance.toLocaleString('en-IN')}`
+          `₹${Math.floor(periodInvestment).toLocaleString('en-IN')}`,
+          `₹${Math.floor(cumulativeInvested).toLocaleString('en-IN')}`,
+          `₹${Math.floor(periodReturn).toLocaleString('en-IN')}`, 
+          `₹${Math.floor(currentBalance).toLocaleString('en-IN')}`
         ].forEach(txt => row.insertCell().textContent = txt);
-        
+
         // Update previous balance for next iteration
         previousBalance = currentBalance;
       }
     }
-    
+
     // Initial calculation
     calculate();
   </script>
