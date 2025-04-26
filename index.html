@@ -7,191 +7,36 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* Base styling with Solarized theme */
-    body { 
-      margin: 0; 
-      padding: 1.5rem; 
-      background: #fdf6e3; 
-      color: #073642; 
-      font-family: 'Segoe UI', 'Roboto', 'Courier New', monospace; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center;
-      line-height: 1.6;
-    }
-    h1 { 
-      color: #b58900; 
-      margin: 0 0 1rem; 
-      font-size: 2.2rem;
-      text-align: center;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-    section { 
-      width: 100%; 
-      max-width: 800px; 
-      background: rgba(238,232,213,0.5);
-      border-radius: 8px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      margin-bottom: 1.5rem;
-    }
-    hr { 
-      width: 70%; 
-      border: none; 
-      border-top: 2px dashed #b58900; 
-      margin: 1.5rem auto; 
-    }
+    body { margin:0; padding:1rem; background:#fdf6e3; color:#073642; font-family:'Courier New', monospace; display:flex; flex-direction:column; align-items:center; }
+    h1 { color:#b58900; margin:0 0 0.5rem; font-size:1.8rem; }
+    section { width:100%; max-width:720px; }
+    hr { width:100%; border:none; border-top:2px solid #b58900; margin:1.5rem 0; }
     
     /* Form controls styling */
-    .controls { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); 
-      gap: 1.2rem 1.5rem; 
-      align-items: end;
-      margin-bottom: 1rem;
-    }
-    .controls label { 
-      font-size: 0.9rem; 
-      color: #586e75; 
-      margin-bottom: 0.3rem;
-      font-weight: 500;
-      display: block;
-    }
-    .controls input[type="number"] { 
-      width: 100%; 
-      padding: 0.5rem; 
-      font-size: 1.1rem; 
-      border: 1px solid #586e75; 
-      border-radius: 6px; 
-      background: #eee8d5; 
-      color: #073642;
-      transition: all 0.2s ease;
-    }
-    .controls input[type="number"]:focus {
-      outline: none;
-      border-color: #268bd2;
-      box-shadow: 0 0 0 2px rgba(38,139,210,0.2);
-    }
-    .controls input[type="range"] { 
-      width: 100%; 
-      height: 6px; 
-      background: #586e75; 
-      border-radius: 3px;
-      margin-top: 0.5rem;
-    }
-    .controls input[type="range"]::-webkit-slider-thumb { 
-      -webkit-appearance: none; 
-      width: 18px; 
-      height: 18px; 
-      border-radius: 50%; 
-      background: #2aa198; 
-      border: 2px solid #073642; 
-      margin-top: -6px; 
-      transition: transform 0.2s;
-      cursor: pointer;
-    }
-    .controls input[type="range"]::-webkit-slider-thumb:hover { 
-      transform: scale(1.3);
-    }
+    .controls { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:0.8rem 1.2rem; align-items:end; }
+    .controls label { font-size:0.85rem; color:#586e75; margin-bottom:0.2rem; }
+    .controls input[type="number"] { width:100%; padding:0.3rem; font-size:1rem; border:1px solid #586e75; border-radius:3px; background:#eee8d5; color:#073642; }
+    .controls input[type="range"] { width:100%; height:5px; background:#586e75; border-radius:3px; }
+    .controls input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#2aa198; border:2px solid #073642; margin-top:-4.5px; transition:transform 0.1s; }
+    .controls input[type="range"]::-webkit-slider-thumb:hover { transform:scale(1.2); }
     
     /* Button group styling */
-    .btn-group { 
-      grid-column: 1 / -1; 
-      display: flex; 
-      gap: 0.8rem; 
-      margin-bottom: 1rem;
-    }
-    .btn-group button { 
-      flex: 1; 
-      padding: 0.7rem 1rem; 
-      border: 1px solid #586e75; 
-      background: #eee8d5; 
-      color: #073642; 
-      cursor: pointer; 
-      font-size: 1rem;
-      font-weight: 500; 
-      border-radius: 6px; 
-      transition: all 0.3s ease;
-    }
-    .btn-group button:hover {
-      background: #d8d2c3;
-    }
-    .btn-group button.active { 
-      background: #268bd2; 
-      color: #fdf6e3; 
-      border-color: #07689f;
-      box-shadow: 0 2px 6px rgba(38,139,210,0.4);
-    }
-    #result { 
-      grid-column: 1 / -1; 
-      font-size: 1.1rem; 
-      line-height: 1.5; 
-      padding: 1rem;
-      background: #eee8d5;
-      border-radius: 6px;
-      border-left: 4px solid #2aa198;
-      margin-top: 0.5rem;
-      font-weight: 500;
-    }
+    .btn-group { grid-column:1 / -1; display:flex; gap:0.5rem; margin-bottom:0.5rem; }
+    .btn-group button { flex:1; padding:0.5rem; border:1px solid #586e75; background:#eee8d5; color:#073642; cursor:pointer; font-size:0.95rem; border-radius:3px; transition:background 0.2s; }
+    .btn-group button.active { background:#268bd2; color:#fdf6e3; border-color:#07689f; }
+    #result { grid-column:1 / -1; font-size:0.95rem; line-height:1.3; padding:0.4rem 0; }
 
     /* Charts layout */
-    .charts { 
-      display: grid; 
-      grid-template-columns: 1fr; 
-      gap: 1.5rem;
-    }
-    @media (min-width: 700px) { 
-      .charts { 
-        grid-template-columns: 1fr 1fr; 
-      } 
-    }
-    .chart-container {
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .chart-title {
-      text-align: center;
-      color: #586e75;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    canvas { 
-      width: 100% !important; 
-      height: auto !important;
-      min-height: 250px;
-    }
+    .charts { display:grid; grid-template-columns:1fr; gap:1rem; }
+    @media (min-width:600px) { .charts { grid-template-columns:1fr 1fr; } }
+    canvas { width:100% !important; height:auto !important; }
 
     /* Table styling */
-    .table-container { 
-      overflow-x: auto; 
-      margin-top: 0.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      background: white;
-    }
-    table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      font-size: 0.9rem;
-    }
-    th, td { 
-      border: 1px solid #d8d2c3; 
-      padding: 0.6rem 0.8rem; 
-      text-align: center;
-    }
-    th { 
-      background: #eee8d5; 
-      color: #073642;
-      position: sticky;
-      top: 0;
-    }
-    tbody tr:nth-child(even) { 
-      background: rgba(238,232,213,0.3);
-    }
-    tbody tr:hover {
-      background: rgba(38,139,210,0.05);
-    }
+    .table-container { overflow-x:auto; margin-top:0.5rem; }
+    table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    th, td { border:1px solid #586e75; padding:0.4rem 0.6rem; text-align:center; }
+    th { background:#eee8d5; color:#073642; }
+    tbody tr:nth-child(even) { background:rgba(230,230,210,0.5); }
   </style>
 </head>
 <body>
@@ -227,14 +72,8 @@
   <hr />
   
   <section class="charts">
-    <div class="chart-container">
-      <div class="chart-title">Investment Growth Over Time</div>
-      <canvas id="barChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <div class="chart-title">Portfolio Composition</div>
-      <canvas id="pieChart"></canvas>
-    </div>
+    <canvas id="barChart"></canvas>
+    <canvas id="pieChart"></canvas>
   </section>
   
   <hr />
