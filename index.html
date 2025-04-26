@@ -6,31 +6,36 @@
   <title>Retro SIP Calculator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Retro base */
+    /* ===== Retro Base ===== */
     body {
       margin: 0;
       padding: 1rem;
       background: #fdf6e3;
       color: #073642;
       font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
-      text-align: center;
       color: #b58900;
-      margin-bottom: 0.5rem;
+      margin: 0 0 1rem;
     }
     hr {
+      width: 100%;
+      max-width: 800px;
       border: none;
       border-top: 2px solid #b58900;
       margin: 1.5rem 0;
     }
 
-    /* Controls grid */
+    /* ===== Controls Grid ===== */
     .controls {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
       gap: 1rem;
-      align-items: end;
+      width: 100%;
+      max-width: 800px;
     }
     .controls label {
       display: block;
@@ -65,24 +70,29 @@
       background: #268bd2;
       color: #fdf6e3;
     }
-
-    /* Results */
     #result {
       grid-column: 1 / -1;
+      text-align: center;
       font-size: 1.1rem;
-      padding-top: 0.5rem;
+      padding: 0.5rem 0;
     }
 
-    /* Charts */
+    /* ===== Charts ===== */
     .charts {
+      width: 100%;
+      max-width: 800px;
       display: grid;
-      grid-template-columns: 1fr;
       gap: 1.5rem;
     }
-    canvas { width: 100% !important; height: auto !important; }
+    canvas {
+      width: 100% !important;
+      height: 300px !important;     /* taller chart for mobile */
+    }
 
-    /* Table */
+    /* ===== Table ===== */
     .table-container {
+      width: 100%;
+      max-width: 800px;
       overflow-x: auto;
     }
     table {
@@ -99,6 +109,11 @@
       background: #eee8d5;
       color: #073642;
     }
+
+    /* responsive tweak */
+    @media (max-width: 500px) {
+      canvas { height: 400px !important; }
+    }
   </style>
 </head>
 <body>
@@ -110,7 +125,7 @@
       <button id="btnYr">Yearly</button>
     </div>
     <div>
-      <label>Period Count</label>
+      <label>Periods</label>
       <input id="countNum" type="number" min="1" max="360" value="120"/>
       <input id="countRng" type="range" min="1" max="360" value="120"/>
     </div>
@@ -127,20 +142,20 @@
     <div id="result">Invested: ₹0  Value: ₹0  Gain: ₹0</div>
   </div>
 
-  <hr/>
+  <hr />
 
   <div class="charts">
     <canvas id="barChart"></canvas>
     <canvas id="pieChart"></canvas>
   </div>
 
-  <hr/>
+  <hr />
 
   <div class="table-container">
     <table id="dataTable">
       <thead>
         <tr>
-          <th>Period</th><th>Invested</th><th>Value</th><th>Gain</th>
+          <th>Period</th><th>Invested</th><th>Return</th><th>Total Value</th>
           <th>Cum. Invested</th><th>Cum. Gain</th>
         </tr>
       </thead>
@@ -149,7 +164,7 @@
   </div>
 
   <script>
-    // refs
+    // element refs
     const btnMo = document.getElementById('btnMo'),
           btnYr = document.getElementById('btnYr'),
           countNum = document.getElementById('countNum'),
@@ -163,82 +178,105 @@
 
     let mode = 'mo';  // 'mo' or 'yr'
 
-    // Chart.js setup
+    // Chart.js grouped bar + pie
     const barCtx = document.getElementById('barChart').getContext('2d'),
           pieCtx = document.getElementById('pieChart').getContext('2d');
     const bar = new Chart(barCtx, {
       type: 'bar',
-      data: { labels: [], datasets:[{ label:'Value ₹', data:[], backgroundColor: '#cb4b16' }]},
-      options:{responsive:true, animation:{duration:400}}
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Invested', data: [], backgroundColor: '#268bd2' },
+          { label: 'Return',   data: [], backgroundColor: '#2aa198' }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { stacked: false },
+          y: { beginAtZero: true }
+        }
+      }
     });
     const pie = new Chart(pieCtx, {
       type: 'pie',
-      data: { labels:['Invested','Gain'], datasets:[{ data:[], backgroundColor:['#859900','#2aa198'] }] },
-      options:{responsive:true, animation:{duration:400}}
+      data: {
+        labels: ['Invested', 'Gain'],
+        datasets: [{ data: [], backgroundColor: ['#268bd2', '#2aa198'] }]
+      },
+      options: { responsive: true }
     });
 
-    // sync inputs
+    // sync sliders ↔ numbers
     [[countNum,countRng],[amtNum,amtRng],[retNum,retRng]].forEach(pair=>{
       const [n,r]=pair;
-      r.addEventListener('input',()=>{n.value=r.value; calc();});
-      n.addEventListener('input',()=>{r.value=n.value; calc();});
+      r.addEventListener('input',()=>{ n.value = r.value; calculate(); });
+      n.addEventListener('input',()=>{ r.value = n.value; calculate(); });
     });
 
-    // toggle
+    // toggle mode
     btnMo.addEventListener('click',()=>{
       mode='mo'; btnMo.classList.add('active'); btnYr.classList.remove('active');
-      countNum.max=360; countRng.max=360; calc();
+      countNum.max=360; countRng.max=360; calculate();
     });
     btnYr.addEventListener('click',()=>{
       mode='yr'; btnYr.classList.add('active'); btnMo.classList.remove('active');
-      countNum.max=50; countRng.max=50; calc();
+      countNum.max=50; countRng.max=50; calculate();
     });
 
-    function calc(){
+    function calculate(){
       const P = +amtRng.value,
             annual = +retRng.value,
             n = +countRng.value,
             r = annual/100/(mode==='mo'?12:1);
-      const FV = P*((Math.pow(1+r,n)-1)/r)*(1+r),
-            invested = P*n,
-            gain = FV-invested;
-      resultDiv.textContent = 
-        `Invested: ₹${invested.toFixed(0)}  Value: ₹${FV.toFixed(0)}  Gain: ₹${gain.toFixed(0)}`;
-      updateCharts(n,P,r,invested,FV);
-      updateTable(n,P,r);
-    }
 
-    function updateCharts(n,P,r,inv,fv){
-      const labels=[], data=[];
+      // compute totals
+      let cumInv=0, cumGain=0;
+      const invSeries = [], retSeries = [], labels = [];
       for(let i=1;i<=n;i++){
-        labels.push(mode==='mo'?i+' mo':i+' yr');
-        data.push(
-          (P*((Math.pow(1+r,i)-1)/r)*(1+r)).toFixed(0)
-        );
+        const invested = P;
+        const value = invested * ((Math.pow(1+r,i)-1)/r) * (1+r);
+        const gain = value - invested;
+        cumInv += invested;
+        cumGain += gain;
+        labels.push(mode==='mo'? i+' mo' : i+' yr');
+        invSeries.push(invested.toFixed(0));
+        retSeries.push(gain.toFixed(0));
       }
-      bar.data.labels=labels; bar.data.datasets[0].data=data; bar.update();
-      pie.data.datasets[0].data=[inv.toFixed(0),(fv-inv).toFixed(0)]; pie.update();
+      const totalInv = cumInv, totalVal = (cumInv + cumGain);
+
+      // update result text
+      resultDiv.textContent =
+        `Invested: ₹${totalInv.toFixed(0)}  Value: ₹${totalVal.toFixed(0)}  Gain: ₹${cumGain.toFixed(0)}`;
+
+      // update grouped bar chart
+      bar.data.labels = labels;
+      bar.data.datasets[0].data = invSeries;
+      bar.data.datasets[1].data = retSeries;
+      bar.update();
+
+      // update pie
+      pie.data.datasets[0].data = [totalInv.toFixed(0), cumGain.toFixed(0)];
+      pie.update();
+
+      // update table
+      tbody.innerHTML = '';
+      let accInv=0, accGain=0;
+      for(let i=0;i<n;i++){
+        const inv = +invSeries[i], gain = +retSeries[i];
+        accInv += inv; accGain += gain;
+        const row = tbody.insertRow();
+        row.insertCell().textContent = labels[i];
+        row.insertCell().textContent = `₹${inv}`;
+        row.insertCell().textContent = `₹${gain}`;
+        row.insertCell().textContent = `₹${(inv+gain).toFixed(0)}`;
+        row.insertCell().textContent = `₹${accInv}`;
+        row.insertCell().textContent = `₹${accGain}`;
+      }
     }
 
-    function updateTable(n,P,r){
-      tbody.innerHTML='';
-      let cumI=0, cumG=0;
-      for(let i=1;i<=n;i++){
-        const val = P*((Math.pow(1+r,i)-1)/r)*(1+r),
-              inv = P, gain = val-inv;
-        cumI+=inv; cumG+=gain;
-        const row=tbody.insertRow();
-        row.insertCell().textContent = mode==='mo'?`${i} mo`:`${i} yr`;
-        row.insertCell().textContent = `₹${inv.toFixed(0)}`;
-        row.insertCell().textContent = `₹${val.toFixed(0)}`;
-        row.insertCell().textContent = `₹${gain.toFixed(0)}`;
-        row.insertCell().textContent = `₹${cumI.toFixed(0)}`;
-        row.insertCell().textContent = `₹${cumG.toFixed(0)}`;
-      }
-    }
-
-    // initial
-    calc();
+    // initial draw
+    calculate();
   </script>
 </body>
 </html>
