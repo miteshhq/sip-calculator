@@ -135,25 +135,55 @@
 
     // Mode toggle handlers
     btnMo.addEventListener('click', () => { 
-      mode = 'mo'; 
-      btnMo.classList.add('active'); 
-      btnYr.classList.remove('active'); 
-      countNum.max = 360; 
-      countRng.max = 360; 
-      countLabel.textContent = '# of Months'; 
-      amountLabel.textContent = 'Amount per Month (₹)'; 
-      calculate(); 
+      if (mode !== 'mo') {
+        mode = 'mo'; 
+        btnMo.classList.add('active'); 
+        btnYr.classList.remove('active'); 
+        countNum.max = 360; 
+        countRng.max = 360; 
+        countLabel.textContent = '# of Months'; 
+        amountLabel.textContent = 'Amount per Month (₹)';
+        
+        // Convert years to months
+        const currentYears = parseInt(countNum.value);
+        const newMonths = currentYears * 12;
+        countNum.value = newMonths;
+        countRng.value = newMonths;
+        
+        // Convert yearly amount to monthly amount
+        const yearlyAmount = parseInt(amtNum.value);
+        const monthlyAmount = Math.round(yearlyAmount / 12);
+        amtNum.value = monthlyAmount;
+        amtRng.value = monthlyAmount;
+        
+        calculate();
+      }
     });
     
     btnYr.addEventListener('click', () => { 
-      mode = 'yr'; 
-      btnYr.classList.add('active'); 
-      btnMo.classList.remove('active'); 
-      countNum.max = 50; 
-      countRng.max = 50; 
-      countLabel.textContent = '# of Years'; 
-      amountLabel.textContent = 'Amount per Year (₹)'; 
-      calculate(); 
+      if (mode !== 'yr') {
+        mode = 'yr'; 
+        btnYr.classList.add('active'); 
+        btnMo.classList.remove('active'); 
+        countNum.max = 50; 
+        countRng.max = 50; 
+        countLabel.textContent = '# of Years'; 
+        amountLabel.textContent = 'Amount per Year (₹)';
+        
+        // Convert months to years
+        const currentMonths = parseInt(countNum.value);
+        const newYears = Math.ceil(currentMonths / 12);
+        countNum.value = newYears;
+        countRng.value = newYears;
+        
+        // Convert monthly amount to yearly amount
+        const monthlyAmount = parseInt(amtNum.value);
+        const yearlyAmount = monthlyAmount * 12;
+        amtNum.value = yearlyAmount;
+        amtRng.value = yearlyAmount;
+        
+        calculate();
+      }
     });
 
     function calculate() {
