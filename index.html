@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced SIP Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .controls, .charts, .table-container {
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      width: 100%;
+      max-width: 800px;
+      transition: transform 0.3s;
+    }
+    .controls:hover, .charts:hover, .table-container:hover {
+      transform: translateY(-5px);
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .btn-group button {
+      flex: 1;
+      padding: 0.5rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 0.5rem;
+      background: #4CAF50;
+      color: #fff;
+      transition: background 0.3s;
+    }
+    .btn-group button.active {
+      background: #388E3C;
+    }
+    .control-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      flex: 1 1 200px;
+    }
+    .control-group label {
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .control-group input[type="number"],
+    .control-group input[type="month"],
+    .control-group input[type="range"] {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    .control-group input[type="range"] {
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+      outline: none;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #FF5722; cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    .result {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+    .table-container { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.5rem;
+      text-align: center;
+      border: 1px solid #eee;
+    }
+    th { background: #f5f5f5; }
+    @media (max-width: 600px) {
+      .control-row { flex-direction: column; }
+    }
+    canvas { width:100% !important; height:auto !important; }
+  </style>
+</head>
+<body>
+
+  <h2>Advanced SIP Calculator</h2>
+
+  <div class="controls">
+    <div class="btn-group">
+      <button id="btnMonthly" class="active">Monthly</button>
+      <button id="btnYearly">Yearly</button>
+    </div>
+    <div class="control-row">
+      <div class="control-group">
+        <label id="lblPeriod">Select Month</label>
+        <input id="periodInput" type="month" value="2025-04" />
+      </div>
+      <div class="control-group">
+        <label>Monthly SIP Amount (₹)</label>
+        <input id="amountNum" type="number" min="0" value="5000" />
+        <input id="amountRng" type="range" min="0" max="100000" step="500" value="5000" />
+      </div>
+      <div class="control-group">
+        <label>Annual Return (%)</label>
+        <input id="returnNum" type="number" min="0" max="30" step="0.1" value="12" />
+        <input id="returnRng" type="range" min="0" max="30" step="0.1" value="12" />
+      </div>
+      <div class="control-group">
+        <label id="lblDuration">Duration (Months)</label>
+        <input id="durationNum" type="number" min="1" max="360" value="120" />
+        <input id="durationRng" type="range" min="1" max="360" value="120" />
+      </div>
+    </div>
+    <div class="result" id="resultText">
+      Invested: ₹0<br>
+      Value: ₹0<br>
+      Gain: ₹0
+    </div>
+  </div>
+
+  <div class="charts">
+    <canvas id="barChart"></canvas>
+    <canvas id="pieChart" style="margin-top:1rem;"></canvas>
+  </div>
+
+  <div class="table-container">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Period</th><th>Invested</th><th>Value</th><th>Gain</th>
+          <th>Cum. Invested</th><th>Cum. Gain</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Element refs
+    const btnMonthly = document.getElementById('btnMonthly'),
+          btnYearly  = document.getElementById('btnYearly'),
+          lblPeriod  = document.getElementById('lblPeriod'),
+          lblDur     = document.getElementById('lblDuration'),
+          periodInput= document.getElementById('periodInput'),
+          amountNum  = document.getElementById('amountNum'),
+          amountRng  = document.getElementById('amountRng'),
+          returnNum  = document.getElementById('returnNum'),
+          returnRng  = document.getElementById('returnRng'),
+          durationNum= document.getElementById('durationNum'),
+          durationRng= document.getElementById('durationRng'),
+          resultText = document.getElementById('resultText'),
+          tableBody  = document.querySelector('#dataTable tbody');
+
+    let mode = 'monthly';
+
+    // Chart setup
+    const barCtx = document.getElementById('barChart').getContext('2d'),
+          pieCtx = document.getElementById('pieChart').getContext('2d');
+    const barChart = new Chart(barCtx, {
+      type: 'bar',
+      data: { labels: [], datasets: [{
+        label: 'Corpus Value (₹)',
+        data: [], backgroundColor: Chart.helpers.color('rgba(255,87,34,0.7)').rgbString()
+      }]},
+      options: { responsive:true, animation:{duration:500} }
+    });
+    const pieChart = new Chart(pieCtx, {
+      type: 'pie',
+      data: { labels:['Invested','Gain'], datasets:[{
+        data: [], backgroundColor:['#4CAF50','#FFC107']
+      }]},
+      options: { responsive:true, animation:{duration:500} }
+    });
+
+    // Sync sliders & numbers
+    [[amountNum,amountRng],[returnNum,returnRng],[durationNum,durationRng]].forEach(pair=>{
+      const [num, rng] = pair;
+      rng.addEventListener('input',()=>{ num.value=rng.value; calculate(); });
+      num.addEventListener('input',()=>{ rng.value=num.value; calculate(); });
+    });
+
+    // Period toggle
+    btnMonthly.addEventListener('click',()=>{
+      mode='monthly';
+      btnMonthly.classList.add('active'); btnYearly.classList.remove('active');
+      lblPeriod.textContent='Select Month'; periodInput.type='month';
+      lblDur.textContent='Duration (Months)'; durationNum.min=1; durationRng.min=1;
+      durationNum.max=360; durationRng.max=360; calculate();
+    });
+    btnYearly.addEventListener('click',()=>{
+      mode='yearly';
+      btnYearly.classList.add('active'); btnMonthly.classList.remove('active');
+      lblPeriod.textContent='Select Year'; periodInput.type='number'; periodInput.min=1; periodInput.max=50;
+      lblDur.textContent='Duration (Years)'; durationNum.min=1; durationRng.min=1;
+      durationNum.max=50; durationRng.max=50; calculate();
+    });
+
+    // Core calculation + UI update
+    function calculate(){
+      const P = parseFloat(amountRng.value),
+            annual = parseFloat(returnRng.value),
+            dur = parseInt(durationRng.value),
+            r = annual/100/(mode==='monthly'?12:1),
+            n = dur;
+      const FV = P * ((Math.pow(1+r,n)-1)/r) * (1+r),
+            invested = P * n,
+            gain = FV - invested;
+      resultText.innerHTML = 
+        `Invested: ₹${invested.toFixed(0)}<br>`+
+        `Value: ₹${FV.toFixed(0)}<br>`+
+        `Gain: ₹${gain.toFixed(0)}`;
+      updateCharts(invested,FV); updateTable(P,r,n);
+    }
+
+    // Chart update
+    function updateCharts(inv, fv){
+      const labels=[], data=[];
+      for(let i=1;i<=durationRng.value;i++){
+        labels.push(mode==='monthly'?`M${i}`:`Y${i}`);
+        data.push((amountRng.value*((Math.pow(1+(returnRng.value/100)/(mode==='monthly'?12:1),i)-1)/((returnRng.value/100)/(mode==='monthly'?12:1)))*(1+(returnRng.value/100)/(mode==='monthly'?12:1))).toFixed(0));
+      }
+      barChart.data.labels=labels; barChart.data.datasets[0].data=data; barChart.update();
+      pieChart.data.datasets[0].data=[inv.toFixed(0),(fv-inv).toFixed(0)]; pieChart.update();
+    }
+
+    // Table update
+    function updateTable(P, r, n){
+      tableBody.innerHTML='';
+      let cumInv=0, cumGain=0;
+      for(let i=1;i<=n;i++){
+        const val = P*((Math.pow(1+r,i)-1)/r)*(1+r),
+              inv = P,
+              gain = val-inv;
+        cumInv += inv; cumGain += gain;
+        const row = tableBody.insertRow();
+        row.insertCell().textContent = mode==='monthly'?periodInput.value+'+'+i+'mo':`${i} yr`;
+        row.insertCell().textContent = `₹${inv.toFixed(0)}`;
+        row.insertCell().textContent = `₹${val.toFixed(0)}`;
+        row.insertCell().textContent = `₹${gain.toFixed(0)}`;
+        row.insertCell().textContent = `₹${cumInv.toFixed(0)}`;
+        row.insertCell().textContent = `₹${cumGain.toFixed(0)}`;
+      }
+    }
+
+    // Initial draw
+    calculate();
+  </script>
+</body>
+</html>
