@@ -6,10 +6,10 @@
   <title>Retro SIP Calculator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* ===== Retro Base ===== */
+    /* —— Base & Typography —— */
     body {
       margin: 0;
-      padding: 1rem;
+      padding: 1.5rem;
       background: #fdf6e3;
       color: #073642;
       font-family: 'Courier New', monospace;
@@ -19,152 +19,185 @@
     }
     h1 {
       color: #b58900;
-      margin: 0 0 1rem;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    section {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 2rem;
     }
     hr {
-      width: 100%;
-      max-width: 800px;
       border: none;
       border-top: 2px solid #b58900;
-      margin: 1.5rem 0;
+      margin: 2rem 0;
     }
 
-    /* ===== Controls Grid ===== */
+    /* —— Controls —— */
     .controls {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
-      gap: 1rem;
-      width: 100%;
-      max-width: 800px;
+      grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+      gap: 1.2rem;
+      align-items: end;
     }
     .controls label {
       display: block;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      color: #586e75;
     }
-    .controls input[type="number"],
+    .controls input[type="number"] {
+      width: 100%;
+      padding: 0.4rem;
+      font-size: 1rem;
+      border: 1px solid #586e75;
+      border-radius: 4px;
+      background: #eee8d5;
+      color: #073642;
+    }
+    .controls input[type="number"]:focus {
+      outline: none;
+      border-color: #268bd2;
+      box-shadow: 0 0 3px rgba(38,139,210,0.5);
+    }
     .controls input[type="range"] {
       width: 100%;
+      height: 6px;
+      background: #586e75;
+      border-radius: 3px;
+      cursor: pointer;
     }
     .controls input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: #dc322f; cursor: pointer;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #dc322f;
+      border: 2px solid #073642;
+      cursor: pointer;
+      margin-top: -6px;
+      transition: transform 0.1s;
     }
-    .controls input[type="range"] {
-      height: 4px; background: #586e75;
+    .controls input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
     }
     .btn-group {
       grid-column: 1 / -1;
       display: flex;
+      gap: 0.5rem;
     }
     .btn-group button {
       flex: 1;
-      padding: 0.5rem;
+      padding: 0.6rem;
       border: 1px solid #586e75;
       background: #eee8d5;
       color: #073642;
       cursor: pointer;
       font-family: inherit;
+      font-size: 1rem;
+      border-radius: 4px;
+      transition: background 0.2s;
     }
     .btn-group button.active {
       background: #268bd2;
       color: #fdf6e3;
+      border-color: #07689f;
     }
     #result {
       grid-column: 1 / -1;
-      text-align: center;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      line-height: 1.4;
       padding: 0.5rem 0;
+      color: #073642;
     }
 
-    /* ===== Charts ===== */
+    /* —— Charts —— */
     .charts {
-      width: 100%;
-      max-width: 800px;
       display: grid;
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+      gap: 1rem;
     }
     canvas {
       width: 100% !important;
-      height: 300px !important;     /* taller chart for mobile */
+      height: auto !important;
     }
 
-    /* ===== Table ===== */
+    /* —— Table —— */
     .table-container {
-      width: 100%;
-      max-width: 800px;
       overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
+      margin-top: 0.5rem;
     }
     th, td {
       border: 1px solid #586e75;
-      padding: 0.4rem 0.6rem;
+      padding: 0.5rem;
       text-align: center;
     }
     th {
       background: #eee8d5;
       color: #073642;
     }
-
-    /* responsive tweak */
-    @media (max-width: 500px) {
-      canvas { height: 400px !important; }
+    tbody tr:nth-child(even) {
+      background: rgba(230,230,210,0.5);
     }
   </style>
 </head>
 <body>
   <h1>Retro SIP Calculator</h1>
 
-  <div class="controls">
-    <div class="btn-group">
-      <button id="btnMo" class="active">Monthly</button>
-      <button id="btnYr">Yearly</button>
+  <section>
+    <div class="controls">
+      <div class="btn-group">
+        <button id="btnMo" class="active">Monthly</button>
+        <button id="btnYr">Yearly</button>
+      </div>
+      <div>
+        <label for="countNum">Periods</label>
+        <input id="countNum" type="number" min="1" max="360" value="120"/>
+        <input id="countRng" type="range" min="1" max="360" value="120"/>
+      </div>
+      <div>
+        <label for="amtNum">Amount / Period (₹)</label>
+        <input id="amtNum" type="number" min="0" value="5000"/>
+        <input id="amtRng" type="range" min="0" max="100000" step="500" value="5000"/>
+      </div>
+      <div>
+        <label for="retNum">Annual Return (%)</label>
+        <input id="retNum" type="number" min="0" max="30" step="0.1" value="12"/>
+        <input id="retRng" type="range" min="0" max="30" step="0.1" value="12"/>
+      </div>
+      <div id="result">
+        Invested: ₹0<br>
+        Estimated Value: ₹0<br>
+        Estimated Gain: ₹0
+      </div>
     </div>
-    <div>
-      <label>Periods</label>
-      <input id="countNum" type="number" min="1" max="360" value="120"/>
-      <input id="countRng" type="range" min="1" max="360" value="120"/>
-    </div>
-    <div>
-      <label>Amount per Period (₹)</label>
-      <input id="amtNum" type="number" min="0" value="5000"/>
-      <input id="amtRng" type="range" min="0" max="100000" step="500" value="5000"/>
-    </div>
-    <div>
-      <label>Annual Return (%)</label>
-      <input id="retNum" type="number" min="0" max="30" step="0.1" value="12"/>
-      <input id="retRng" type="range" min="0" max="30" step="0.1" value="12"/>
-    </div>
-    <div id="result">Invested: ₹0  Value: ₹0  Gain: ₹0</div>
-  </div>
+  </section>
 
-  <hr />
+  <hr/>
 
-  <div class="charts">
+  <section class="charts">
     <canvas id="barChart"></canvas>
     <canvas id="pieChart"></canvas>
-  </div>
+  </section>
 
-  <hr />
+  <hr/>
 
-  <div class="table-container">
+  <section class="table-container">
     <table id="dataTable">
       <thead>
         <tr>
-          <th>Period</th><th>Invested</th><th>Return</th><th>Total Value</th>
+          <th>Period</th><th>Invested</th><th>Return</th><th>Total</th>
           <th>Cum. Invested</th><th>Cum. Gain</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-  </div>
+  </section>
 
   <script>
-    // element refs
     const btnMo = document.getElementById('btnMo'),
           btnYr = document.getElementById('btnYr'),
           countNum = document.getElementById('countNum'),
@@ -176,45 +209,27 @@
           resultDiv = document.getElementById('result'),
           tbody = document.querySelector('#dataTable tbody');
 
-    let mode = 'mo';  // 'mo' or 'yr'
+    let mode = 'mo';
 
-    // Chart.js grouped bar + pie
-    const barCtx = document.getElementById('barChart').getContext('2d'),
-          pieCtx = document.getElementById('pieChart').getContext('2d');
-    const bar = new Chart(barCtx, {
+    const bar = new Chart(document.getElementById('barChart').getContext('2d'), {
       type: 'bar',
-      data: {
-        labels: [],
-        datasets: [
-          { label: 'Invested', data: [], backgroundColor: '#268bd2' },
-          { label: 'Return',   data: [], backgroundColor: '#2aa198' }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { stacked: false },
-          y: { beginAtZero: true }
-        }
-      }
+      data: { labels: [], datasets: [
+        { label: 'Invested', data: [], backgroundColor: '#268bd2' },
+        { label: 'Return', data: [], backgroundColor: '#2aa198' }
+      ]},
+      options: { responsive:true, scales:{ y:{ beginAtZero:true } } }
     });
-    const pie = new Chart(pieCtx, {
+    const pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
       type: 'pie',
-      data: {
-        labels: ['Invested', 'Gain'],
-        datasets: [{ data: [], backgroundColor: ['#268bd2', '#2aa198'] }]
-      },
-      options: { responsive: true }
+      data: { labels:['Invested','Gain'], datasets:[{ data: [], backgroundColor:['#268bd2','#2aa198'] }]},
+      options: { responsive:true }
     });
 
-    // sync sliders ↔ numbers
-    [[countNum,countRng],[amtNum,amtRng],[retNum,retRng]].forEach(pair=>{
-      const [n,r]=pair;
-      r.addEventListener('input',()=>{ n.value = r.value; calculate(); });
-      n.addEventListener('input',()=>{ r.value = n.value; calculate(); });
+    [[countNum,countRng],[amtNum,amtRng],[retNum,retRng]].forEach(([n,r])=>{
+      r.addEventListener('input',()=>{ n.value=r.value; calculate(); });
+      n.addEventListener('input',()=>{ r.value=n.value; calculate(); });
     });
 
-    // toggle mode
     btnMo.addEventListener('click',()=>{
       mode='mo'; btnMo.classList.add('active'); btnYr.classList.remove('active');
       countNum.max=360; countRng.max=360; calculate();
@@ -225,57 +240,44 @@
     });
 
     function calculate(){
-      const P = +amtRng.value,
-            annual = +retRng.value,
-            n = +countRng.value,
-            r = annual/100/(mode==='mo'?12:1);
-
-      // compute totals
+      const P=+amtRng.value, annual=+retRng.value, n=+countRng.value,
+            r=annual/100/(mode==='mo'?12:1);
       let cumInv=0, cumGain=0;
-      const invSeries = [], retSeries = [], labels = [];
+      const invSeries=[], retSeries=[], labels=[];
       for(let i=1;i<=n;i++){
-        const invested = P;
-        const value = invested * ((Math.pow(1+r,i)-1)/r) * (1+r);
-        const gain = value - invested;
-        cumInv += invested;
-        cumGain += gain;
-        labels.push(mode==='mo'? i+' mo' : i+' yr');
-        invSeries.push(invested.toFixed(0));
+        const inv=P,
+              val=inv*((Math.pow(1+r,i)-1)/r)*(1+r),
+              gain=val-inv;
+        cumInv+=inv; cumGain+=gain;
+        labels.push(mode==='mo'?i+' mo':i+' yr');
+        invSeries.push(inv.toFixed(0));
         retSeries.push(gain.toFixed(0));
       }
-      const totalInv = cumInv, totalVal = (cumInv + cumGain);
+      const totalInv=cumInv, totalGain=cumGain, totalVal=totalInv+totalGain;
+      resultDiv.innerHTML=
+        `Invested: ₹${totalInv.toFixed(0)}<br>`+
+        `Estimated Value: ₹${totalVal.toFixed(0)}<br>`+
+        `Estimated Gain: ₹${totalGain.toFixed(0)}`;
 
-      // update result text
-      resultDiv.textContent =
-        `Invested: ₹${totalInv.toFixed(0)}  Value: ₹${totalVal.toFixed(0)}  Gain: ₹${cumGain.toFixed(0)}`;
-
-      // update grouped bar chart
-      bar.data.labels = labels;
-      bar.data.datasets[0].data = invSeries;
-      bar.data.datasets[1].data = retSeries;
+      bar.data.labels=labels;
+      bar.data.datasets[0].data=invSeries;
+      bar.data.datasets[1].data=retSeries;
       bar.update();
 
-      // update pie
-      pie.data.datasets[0].data = [totalInv.toFixed(0), cumGain.toFixed(0)];
+      pie.data.datasets[0].data=[totalInv.toFixed(0),totalGain.toFixed(0)];
       pie.update();
 
-      // update table
-      tbody.innerHTML = '';
-      let accInv=0, accGain=0;
-      for(let i=0;i<n;i++){
-        const inv = +invSeries[i], gain = +retSeries[i];
-        accInv += inv; accGain += gain;
-        const row = tbody.insertRow();
-        row.insertCell().textContent = labels[i];
-        row.insertCell().textContent = `₹${inv}`;
-        row.insertCell().textContent = `₹${gain}`;
-        row.insertCell().textContent = `₹${(inv+gain).toFixed(0)}`;
-        row.insertCell().textContent = `₹${accInv}`;
-        row.insertCell().textContent = `₹${accGain}`;
-      }
+      tbody.innerHTML='';
+      let accI=0, accG=0;
+      labels.forEach((lab,i)=>{
+        const inv=+invSeries[i], gain=+retSeries[i];
+        accI+=inv; accG+=gain;
+        const row=tbody.insertRow();
+        [lab, `₹${inv}`, `₹${gain}`, `₹${(inv+gain).toFixed(0)}`, `₹${accI}`, `₹${accG}`]
+          .forEach(txt=>row.insertCell().textContent=txt);
+      });
     }
 
-    // initial draw
     calculate();
   </script>
 </body>
