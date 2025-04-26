@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -9,7 +8,7 @@
     /* —— Base & Typography —— */
     body {
       margin: 0;
-      padding: 1.5rem;
+      padding: 1rem;
       background: #fdf6e3;
       color: #073642;
       font-family: 'Courier New', monospace;
@@ -19,196 +18,163 @@
     }
     h1 {
       color: #b58900;
-      margin-bottom: 1rem;
-      font-size: 2rem;
+      margin: 0 0 0.5rem;
+      font-size: 1.8rem;
     }
-    section {
-      width: 100%;
-      max-width: 800px;
-      margin-bottom: 2rem;
-    }
+    section { width: 100%; max-width: 720px; }
     hr {
+      width: 100%;
       border: none;
       border-top: 2px solid #b58900;
-      margin: 2rem 0;
-    }
+      margin: 1.5rem 0;
+    }/* —— Controls —— */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem 1.2rem;
+  align-items: center;
+}
+.controls label {
+  font-size: 0.85rem;
+  color: #586e75;
+  margin-bottom: 0.2rem;
+}
+.controls input[type="number"] {
+  width: 100%;
+  padding: 0.3rem;
+  font-size: 1rem;
+  border: 1px solid #586e75;
+  border-radius: 3px;
+  background: #eee8d5;
+  color: #073642;
+}
+.controls input[type="range"] {
+  width: 100%;
+  height: 5px;
+  background: #586e75;
+  border-radius: 3px;
+}
+.controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #2aa198;
+  border: 2px solid #073642;
+  margin-top: -4.5px;
+  transition: transform 0.1s;
+}
+.controls input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+.btn-group {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.btn-group button {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #586e75;
+  background: #eee8d5;
+  color: #073642;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+.btn-group button.active {
+  background: #268bd2;
+  color: #fdf6e3;
+  border-color: #07689f;
+}
+#result {
+  grid-column: 1 / -1;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  padding: 0.4rem 0;
+  color: #073642;
+}
 
-    /* —— Controls —— */
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
-      gap: 1.2rem;
-      align-items: end;
-    }
-    .controls label {
-      display: block;
-      margin-bottom: 0.4rem;
-      font-size: 0.9rem;
-      color: #586e75;
-    }
-    .controls input[type="number"] {
-      width: 100%;
-      padding: 0.4rem;
-      font-size: 1rem;
-      border: 1px solid #586e75;
-      border-radius: 4px;
-      background: #eee8d5;
-      color: #073642;
-    }
-    .controls input[type="number"]:focus {
-      outline: none;
-      border-color: #268bd2;
-      box-shadow: 0 0 3px rgba(38,139,210,0.5);
-    }
-    .controls input[type="range"] {
-      width: 100%;
-      height: 6px;
-      background: #586e75;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-    .controls input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #dc322f;
-      border: 2px solid #073642;
-      cursor: pointer;
-      margin-top: -6px;
-      transition: transform 0.1s;
-    }
-    .controls input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
-    .btn-group {
-      grid-column: 1 / -1;
-      display: flex;
-      gap: 0.5rem;
-    }
-    .btn-group button {
-      flex: 1;
-      padding: 0.6rem;
-      border: 1px solid #586e75;
-      background: #eee8d5;
-      color: #073642;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 1rem;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .btn-group button.active {
-      background: #268bd2;
-      color: #fdf6e3;
-      border-color: #07689f;
-    }
-    #result {
-      grid-column: 1 / -1;
-      font-size: 1rem;
-      line-height: 1.4;
-      padding: 0.5rem 0;
-      color: #073642;
-    }
+/* —— Charts —— */
+.charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 600px) {
+  .charts { grid-template-columns: 1fr 1fr; }
+}
+canvas {
+  width: 100% !important;
+  height: auto !important;
+}
 
-    /* —— Charts —— */
-    .charts {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
-      gap: 1rem;
-    }
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-    }
+/* —— Table —— */
+.table-container { overflow-x: auto; margin-top: 0.5rem; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+th, td {
+  border: 1px solid #586e75;
+  padding: 0.4rem 0.6rem;
+  text-align: center;
+}
+th {
+  background: #eee8d5;
+  color: #073642;
+}
+tbody tr:nth-child(even) {
+  background: rgba(230,230,210,0.5);
+}
 
-    /* —— Table —— */
-    .table-container {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-    }
-    th, td {
-      border: 1px solid #586e75;
-      padding: 0.5rem;
-      text-align: center;
-    }
-    th {
-      background: #eee8d5;
-      color: #073642;
-    }
-    tbody tr:nth-child(even) {
-      background: rgba(230,230,210,0.5);
-    }
   </style>
 </head>
 <body>
-  <h1>Retro SIP Calculator</h1>
-
-  <section>
-    <div class="controls">
-      <div class="btn-group">
-        <button id="btnMo" class="active">Monthly</button>
-        <button id="btnYr">Yearly</button>
-      </div>
-      <div>
-        <label for="countNum">Periods</label>
-        <input id="countNum" type="number" min="1" max="360" value="120"/>
-        <input id="countRng" type="range" min="1" max="360" value="120"/>
-      </div>
-      <div>
-        <label for="amtNum">Amount / Period (₹)</label>
-        <input id="amtNum" type="number" min="0" value="5000"/>
-        <input id="amtRng" type="range" min="0" max="100000" step="500" value="5000"/>
-      </div>
-      <div>
-        <label for="retNum">Annual Return (%)</label>
-        <input id="retNum" type="number" min="0" max="30" step="0.1" value="12"/>
-        <input id="retRng" type="range" min="0" max="30" step="0.1" value="12"/>
-      </div>
-      <div id="result">
-        Invested: ₹0<br>
-        Estimated Value: ₹0<br>
-        Estimated Gain: ₹0
-      </div>
+  <h1>Retro SIP Calculator</h1>  <section class="controls">
+    <div class="btn-group">
+      <button id="btnMo" class="active">Monthly</button>
+      <button id="btnYr">Yearly</button>
     </div>
-  </section>
-
-  <hr/>
-
-  <section class="charts">
+    <div>
+      <label for="countNum"># of Periods</label>
+      <input id="countNum" type="number" min="1" max="360" value="120" />
+      <input id="countRng" type="range" min="1" max="360" value="120" />
+    </div>
+    <div>
+      <label for="amtNum">Amount per Period (₹)</label>
+      <input id="amtNum" type="number" min="0" value="5000" />
+      <input id="amtRng" type="range" min="0" max="100000" step="500" value="5000" />
+    </div>
+    <div>
+      <label for="retNum">Annual Return (%)</label>
+      <input id="retNum" type="number" min="0" max="30" step="0.1" value="12" />
+      <input id="retRng" type="range" min="0" max="30" step="0.1" value="12" />
+    </div>
+    <div id="result">
+      Invested: ₹0<br>
+      Estimated Value: ₹0<br>
+      Estimated Gain: ₹0
+    </div>
+  </section>  <hr />  <section class="charts">
     <canvas id="barChart"></canvas>
     <canvas id="pieChart"></canvas>
-  </section>
-
-  <hr/>
-
-  <section class="table-container">
+  </section>  <hr />  <section class="table-container">
     <table id="dataTable">
       <thead>
-        <tr>
-          <th>Period</th><th>Invested</th><th>Return</th><th>Total</th>
-          <th>Cum. Invested</th><th>Cum. Gain</th>
-        </tr>
+        <tr><th>Period</th><th>Invested</th><th>Return</th><th>Total</th><th>Cum. Invested</th><th>Cum. Gain</th></tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>
-
-  <script>
-    const btnMo = document.getElementById('btnMo'),
-          btnYr = document.getElementById('btnYr'),
-          countNum = document.getElementById('countNum'),
-          countRng = document.getElementById('countRng'),
-          amtNum = document.getElementById('amtNum'),
-          amtRng = document.getElementById('amtRng'),
-          retNum = document.getElementById('retNum'),
-          retRng = document.getElementById('retRng'),
-          resultDiv = document.getElementById('result'),
-          tbody = document.querySelector('#dataTable tbody');
-
+  </section>  <script>
+    const btnMo = document.getElementById('btnMo'), btnYr = document.getElementById('btnYr');
+    const countNum = document.getElementById('countNum'), countRng = document.getElementById('countRng');
+    const amtNum = document.getElementById('amtNum'), amtRng = document.getElementById('amtRng');
+    const retNum = document.getElementById('retNum'), retRng = document.getElementById('retRng');
+    const resultDiv = document.getElementById('result'), tbody = document.querySelector('#dataTable tbody');
     let mode = 'mo';
 
     const bar = new Chart(document.getElementById('barChart').getContext('2d'), {
@@ -217,7 +183,7 @@
         { label: 'Invested', data: [], backgroundColor: '#268bd2' },
         { label: 'Return', data: [], backgroundColor: '#2aa198' }
       ]},
-      options: { responsive:true, scales:{ y:{ beginAtZero:true } } }
+      options: { responsive:true, scales:{ y:{ beginAtZero:true } }, plugins:{ tooltip:{ mode:'index', intersect:false } } }
     });
     const pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
       type: 'pie',
@@ -230,55 +196,38 @@
       n.addEventListener('input',()=>{ r.value=n.value; calculate(); });
     });
 
-    btnMo.addEventListener('click',()=>{
-      mode='mo'; btnMo.classList.add('active'); btnYr.classList.remove('active');
-      countNum.max=360; countRng.max=360; calculate();
-    });
-    btnYr.addEventListener('click',()=>{
-      mode='yr'; btnYr.classList.add('active'); btnMo.classList.remove('active');
-      countNum.max=50; countRng.max=50; calculate();
-    });
+    btnMo.addEventListener('click',()=>{ mode='mo'; btnMo.classList.add('active'); btnYr.classList.remove('active'); countNum.max=360; countRng.max=360; calculate(); });
+    btnYr.addEventListener('click',()=>{ mode='yr'; btnYr.classList.add('active'); btnMo.classList.remove('active'); countNum.max=50; countRng.max=50; calculate(); });
 
     function calculate(){
-      const P=+amtRng.value, annual=+retRng.value, n=+countRng.value,
-            r=annual/100/(mode==='mo'?12:1);
-      let cumInv=0, cumGain=0;
+      const P=+amtRng.value, annual=+retRng.value, n=+countRng.value;
+      const r=annual/100/(mode==='mo'?12:1);
+      let cumI=0, cumG=0;
       const invSeries=[], retSeries=[], labels=[];
       for(let i=1;i<=n;i++){
-        const inv=P,
-              val=inv*((Math.pow(1+r,i)-1)/r)*(1+r),
-              gain=val-inv;
-        cumInv+=inv; cumGain+=gain;
-        labels.push(mode==='mo'?i+' mo':i+' yr');
-        invSeries.push(inv.toFixed(0));
-        retSeries.push(gain.toFixed(0));
+        const inv=P;
+        const val=inv*((Math.pow(1+r,i)-1)/r)*(1+r);
+        const gain=val-inv;
+        cumI+=inv; cumG+=gain;
+        labels.push(mode==='mo'? i+' mo': i+' yr');
+        invSeries.push(inv.toFixed(0)); retSeries.push(gain.toFixed(0));
       }
-      const totalInv=cumInv, totalGain=cumGain, totalVal=totalInv+totalGain;
+      const totalInv=cumI, totalGain=cumG, totalVal=totalInv+totalGain;
       resultDiv.innerHTML=
         `Invested: ₹${totalInv.toFixed(0)}<br>`+
         `Estimated Value: ₹${totalVal.toFixed(0)}<br>`+
         `Estimated Gain: ₹${totalGain.toFixed(0)}`;
 
-      bar.data.labels=labels;
-      bar.data.datasets[0].data=invSeries;
-      bar.data.datasets[1].data=retSeries;
-      bar.update();
+      bar.data.labels=labels; bar.data.datasets[0].data=invSeries; bar.data.datasets[1].data=retSeries; bar.update();
+      pie.data.datasets[0].data=[totalInv.toFixed(0),totalGain.toFixed(0)]; pie.update();
 
-      pie.data.datasets[0].data=[totalInv.toFixed(0),totalGain.toFixed(0)];
-      pie.update();
-
-      tbody.innerHTML='';
-      let accI=0, accG=0;
+      tbody.innerHTML=''; let accI=0, accG=0;
       labels.forEach((lab,i)=>{
-        const inv=+invSeries[i], gain=+retSeries[i];
-        accI+=inv; accG+=gain;
-        const row=tbody.insertRow();
-        [lab, `₹${inv}`, `₹${gain}`, `₹${(inv+gain).toFixed(0)}`, `₹${accI}`, `₹${accG}`]
+        const inv=+invSeries[i], gain=+retSeries[i]; accI+=inv; accG+=gain;
+        const row=tbody.insertRow(); [lab, `₹${inv}`, `₹${gain}`, `₹${(inv+gain).toFixed(0)}`, `₹${accI}`, `₹${accG}`]
           .forEach(txt=>row.insertCell().textContent=txt);
       });
     }
-
     calculate();
-  </script>
-</body>
+  </script></body>
 </html>
