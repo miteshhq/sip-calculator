@@ -1,38 +1,48 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Retro SIP Calculator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* Base styling with Solarized theme */
     body { margin:0; padding:1rem; background:#fdf6e3; color:#073642; font-family:'Courier New', monospace; display:flex; flex-direction:column; align-items:center; }
     h1 { color:#b58900; margin:0 0 0.5rem; font-size:1.8rem; }
     section { width:100%; max-width:720px; }
-    hr { width:100%; border:none; border-top:2px solid #b58900; margin:1.5rem 0; }.controls { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:0.8rem 1.2rem; align-items:end; }
-.controls label { font-size:0.85rem; color:#586e75; margin-bottom:0.2rem; }
-.controls input[type="number"] { width:100%; padding:0.3rem; font-size:1rem; border:1px solid #586e75; border-radius:3px; background:#eee8d5; color:#073642; }
-.controls input[type="range"] { width:100%; height:5px; background:#586e75; border-radius:3px; }
-.controls input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#2aa198; border:2px solid #073642; margin-top:-4.5px; transition:transform 0.1s; }
-.controls input[type="range"]::-webkit-slider-thumb:hover { transform:scale(1.2); }
-.btn-group { grid-column:1 / -1; display:flex; gap:0.5rem; margin-bottom:0.5rem; }
-.btn-group button { flex:1; padding:0.5rem; border:1px solid #586e75; background:#eee8d5; color:#073642; cursor:pointer; font-size:0.95rem; border-radius:3px; transition:background 0.2s; }
-.btn-group button.active { background:#268bd2; color:#fdf6e3; border-color:#07689f; }
-#result { grid-column:1 / -1; font-size:0.95rem; line-height:1.3; padding:0.4rem 0; }
+    hr { width:100%; border:none; border-top:2px solid #b58900; margin:1.5rem 0; }
+    
+    /* Form controls styling */
+    .controls { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:0.8rem 1.2rem; align-items:end; }
+    .controls label { font-size:0.85rem; color:#586e75; margin-bottom:0.2rem; }
+    .controls input[type="number"] { width:100%; padding:0.3rem; font-size:1rem; border:1px solid #586e75; border-radius:3px; background:#eee8d5; color:#073642; }
+    .controls input[type="range"] { width:100%; height:5px; background:#586e75; border-radius:3px; }
+    .controls input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#2aa198; border:2px solid #073642; margin-top:-4.5px; transition:transform 0.1s; }
+    .controls input[type="range"]::-webkit-slider-thumb:hover { transform:scale(1.2); }
+    
+    /* Button group styling */
+    .btn-group { grid-column:1 / -1; display:flex; gap:0.5rem; margin-bottom:0.5rem; }
+    .btn-group button { flex:1; padding:0.5rem; border:1px solid #586e75; background:#eee8d5; color:#073642; cursor:pointer; font-size:0.95rem; border-radius:3px; transition:background 0.2s; }
+    .btn-group button.active { background:#268bd2; color:#fdf6e3; border-color:#07689f; }
+    #result { grid-column:1 / -1; font-size:0.95rem; line-height:1.3; padding:0.4rem 0; }
 
-.charts { display:grid; grid-template-columns:1fr; gap:1rem; }
-@media (min-width:600px) { .charts { grid-template-columns:1fr 1fr; } }
-canvas { width:100% !important; height:auto !important; }
+    /* Charts layout */
+    .charts { display:grid; grid-template-columns:1fr; gap:1rem; }
+    @media (min-width:600px) { .charts { grid-template-columns:1fr 1fr; } }
+    canvas { width:100% !important; height:auto !important; }
 
-.table-container { overflow-x:auto; margin-top:0.5rem; }
-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-th, td { border:1px solid #586e75; padding:0.4rem 0.6rem; text-align:center; }
-th { background:#eee8d5; color:#073642; }
-tbody tr:nth-child(even) { background:rgba(230,230,210,0.5); }
-
+    /* Table styling */
+    .table-container { overflow-x:auto; margin-top:0.5rem; }
+    table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    th, td { border:1px solid #586e75; padding:0.4rem 0.6rem; text-align:center; }
+    th { background:#eee8d5; color:#073642; }
+    tbody tr:nth-child(even) { background:rgba(230,230,210,0.5); }
   </style>
 </head>
 <body>
-  <h1>Retro SIP Calculator</h1>  <section class="controls">
+  <h1>Retro SIP Calculator</h1>
+  
+  <section class="controls">
     <div class="btn-group">
       <button id="btnMo" class="active">Monthly</button>
       <button id="btnYr">Yearly</button>
@@ -57,78 +67,156 @@ tbody tr:nth-child(even) { background:rgba(230,230,210,0.5); }
       Estimated Value: ₹0<br>
       Estimated Gain: ₹0
     </div>
-  </section>  <hr />  <section class="charts">
+  </section>
+  
+  <hr />
+  
+  <section class="charts">
     <canvas id="barChart"></canvas>
     <canvas id="pieChart"></canvas>
-  </section>  <hr />  <section class="table-container">
+  </section>
+  
+  <hr />
+  
+  <section class="table-container">
     <table id="dataTable">
       <thead>
         <tr><th>Period</th><th>Invested</th><th>Return</th><th>Total</th><th>Cum. Invested</th><th>Cum. Gain</th></tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>  <script>
+  </section>
+  
+  <script>
+    // Get all DOM elements
     const btnMo = document.getElementById('btnMo'), btnYr = document.getElementById('btnYr');
     const countNum = document.getElementById('countNum'), countRng = document.getElementById('countRng');
     const amtNum = document.getElementById('amtNum'), amtRng = document.getElementById('amtRng');
     const retNum = document.getElementById('retNum'), retRng = document.getElementById('retRng');
     const countLabel = document.getElementById('countLabel'), amountLabel = document.getElementById('amountLabel');
     const resultDiv = document.getElementById('result'), tbody = document.querySelector('#dataTable tbody');
-    let mode = 'mo';
+    let mode = 'mo'; // Default mode is monthly
 
+    // Initialize charts
     const bar = new Chart(document.getElementById('barChart').getContext('2d'), {
-      type: 'bar', data: { labels: [], datasets: [
-        { label: 'Invested', data: [], backgroundColor: '#268bd2' },
-        { label: 'Return',   data: [], backgroundColor: '#2aa198' }
-      ]}, options: { responsive:true, scales:{ y:{ beginAtZero:true } }, plugins:{ tooltip:{ mode:'index', intersect:false } } }
+      type: 'bar', 
+      data: { 
+        labels: [], 
+        datasets: [
+          { label: 'Invested', data: [], backgroundColor: '#268bd2' },
+          { label: 'Return',   data: [], backgroundColor: '#2aa198' }
+        ]
+      }, 
+      options: { 
+        responsive: true, 
+        scales: { y: { beginAtZero: true } }, 
+        plugins: { tooltip: { mode: 'index', intersect: false } } 
+      }
     });
+    
     const pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
-      type: 'pie', data: { labels:['Invested','Gain'], datasets:[{ data: [], backgroundColor:['#268bd2','#2aa198'] }]}, options: { responsive:true }
+      type: 'pie', 
+      data: { 
+        labels: ['Invested', 'Gain'], 
+        datasets: [{ data: [], backgroundColor: ['#268bd2', '#2aa198'] }]
+      }, 
+      options: { responsive: true }
     });
 
-    [[countNum,countRng],[amtNum,amtRng],[retNum,retRng]].forEach(([n,r])=>{ r.addEventListener('input',()=>{ n.value=r.value; calculate(); }); n.addEventListener('input',()=>{ r.value=n.value; calculate(); }); });
+    // Sync number inputs with range sliders
+    [[countNum, countRng], [amtNum, amtRng], [retNum, retRng]].forEach(([n, r]) => { 
+      r.addEventListener('input', () => { n.value = r.value; calculate(); }); 
+      n.addEventListener('input', () => { 
+        // Ensure range is updated correctly
+        r.value = n.value; 
+        calculate(); 
+      }); 
+    });
 
-    btnMo.addEventListener('click',()=>{ mode='mo'; btnMo.classList.add('active'); btnYr.classList.remove('active'); countNum.max=360; countRng.max=360; countLabel.textContent='# of Months'; amountLabel.textContent='Amount per Month (₹)'; calculate(); });
-    btnYr.addEventListener('click',()=>{ mode='yr'; btnYr.classList.add('active'); btnMo.classList.remove('active'); countNum.max=50; countRng.max=50; countLabel.textContent='# of Years'; amountLabel.textContent='Amount per Year (₹)'; calculate(); });
+    // Mode toggle handlers
+    btnMo.addEventListener('click', () => { 
+      mode = 'mo'; 
+      btnMo.classList.add('active'); 
+      btnYr.classList.remove('active'); 
+      countNum.max = 360; 
+      countRng.max = 360; 
+      countLabel.textContent = '# of Months'; 
+      amountLabel.textContent = 'Amount per Month (₹)'; 
+      calculate(); 
+    });
+    
+    btnYr.addEventListener('click', () => { 
+      mode = 'yr'; 
+      btnYr.classList.add('active'); 
+      btnMo.classList.remove('active'); 
+      countNum.max = 50; 
+      countRng.max = 50; 
+      countLabel.textContent = '# of Years'; 
+      amountLabel.textContent = 'Amount per Year (₹)'; 
+      calculate(); 
+    });
 
-    function calculate(){
-      const P=+amtRng.value, annual=+retRng.value, n=+countRng.value;
-      const r=annual/100/(mode==='mo'?12:1);
-      // arrays
-      const labels=[], invSeries=[], retSeries=[];
-      for(let i=1;i<=n;i++){
-        const fv = P*((Math.pow(1+r,i)-1)/r);
-        const invested = P*i;
+    function calculate() {
+      // Get core values
+      const P = +amtRng.value;                    // Principal amount per period
+      const annual = +retRng.value;               // Annual return rate
+      const n = +countRng.value;                  // Number of periods
+      const r = annual / 100 / (mode === 'mo' ? 12 : 1); // Period rate
+
+      // Arrays for data visualization
+      const labels = [], invSeries = [], retSeries = [];
+      
+      // Calculate values for each period
+      for(let i = 1; i <= n; i++) {
+        // Calculate future value using SIP formula
+        const fv = P * ((Math.pow(1 + r, i) - 1) / r);
+        const invested = P * i;
         const gain = fv - invested;
-        labels.push(mode==='mo'? i+' mo': i+' yr');
+        
+        // Format period labels based on mode
+        labels.push(mode === 'mo' ? i + ' mo' : i + ' yr');
         invSeries.push(invested.toFixed(0));
         retSeries.push(gain.toFixed(0));
       }
-      const totalInv = P*n;
-      const totalVal = (P*((Math.pow(1+r,n)-1)/r));
+      
+      // Calculate final totals
+      const totalInv = P * n;
+      const totalVal = P * ((Math.pow(1 + r, n) - 1) / r);
       const totalGain = totalVal - totalInv;
+      
+      // Update result display
       resultDiv.innerHTML =
-        `Invested: ₹${totalInv.toFixed(0)}<br>`+
-        `Estimated Value: ₹${totalVal.toFixed(0)}<br>`+
-        `Estimated Gain: ₹${totalGain.toFixed(0)}`;
+        `Invested: ₹${totalInv.toLocaleString('en-IN')}<br>` +
+        `Estimated Value: ₹${totalVal.toLocaleString('en-IN')}<br>` +
+        `Estimated Gain: ₹${totalGain.toLocaleString('en-IN')}`;
 
-      // update charts
-      bar.data.labels=labels;
-      bar.data.datasets[0].data=invSeries;
-      bar.data.datasets[1].data=retSeries;
+      // Update charts
+      bar.data.labels = labels;
+      bar.data.datasets[0].data = invSeries;
+      bar.data.datasets[1].data = retSeries;
       bar.update();
-      pie.data.datasets[0].data=[totalInv.toFixed(0), totalGain.toFixed(0)];
+      
+      pie.data.datasets[0].data = [totalInv.toFixed(0), totalGain.toFixed(0)];
       pie.update();
 
-      // update table
-      tbody.innerHTML='';
-      for(let i=0;i<labels.length;i++){
-        const inv=+invSeries[i], gain=+retSeries[i], tot=inv+gain;
-        const row=tbody.insertRow();
-        [labels[i], `₹${inv}`, `₹${gain}`, `₹${tot.toFixed(0)}`, `₹${inv}`, `₹${gain}`]
-          .forEach(txt=>row.insertCell().textContent=txt);
+      // Update table
+      tbody.innerHTML = '';
+      for(let i = 0; i < labels.length; i++) {
+        const inv = +invSeries[i], gain = +retSeries[i], tot = inv + gain;
+        const row = tbody.insertRow();
+        [
+          labels[i], 
+          `₹${inv.toLocaleString('en-IN')}`, 
+          `₹${gain.toLocaleString('en-IN')}`, 
+          `₹${tot.toLocaleString('en-IN')}`, 
+          `₹${inv.toLocaleString('en-IN')}`, 
+          `₹${gain.toLocaleString('en-IN')}`
+        ].forEach(txt => row.insertCell().textContent = txt);
       }
     }
+    
+    // Initial calculation
     calculate();
-  </script></body>
+  </script>
+</body>
 </html>
