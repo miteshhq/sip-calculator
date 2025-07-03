@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -6,147 +7,422 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
-<body class="bg-emerald-50 min-h-screen flex items-center justify-center p-6">
-  <div class="w-full max-w-5xl bg-white shadow-2xl rounded-2xl overflow-hidden">
-    <header class="bg-emerald-600 text-white p-6">
-      <h1 class="text-3xl font-bold">SIP Investment Calculator</h1>
-      <p class="mt-1 text-emerald-200">Estimate SIP returns and track growth over time</p>
-    </header><main class="p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
-  <!-- Controls -->
-  <section class="lg:col-span-1 space-y-6">
-    <div class="flex space-x-2">
-      <button id="btnMo" class="flex-1 py-2 text-center bg-yellow-500 text-white font-semibold rounded-lg">Monthly</button>
-      <button id="btnYr" class="flex-1 py-2 text-center bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg">Yearly</button>
-    </div>
-    <div>
-      <label for="countNum" class="block text-sm font-medium text-gray-700"># of <span id="countLabel">Months</span></label>
-      <input id="countNum" type="number" value="120" min="1" class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
-      <input id="countRng" type="range" min="1" max="360" value="120" class="mt-2 w-full" />
-    </div>
-    <div>
-      <label for="amtNum" class="block text-sm font-medium text-gray-700">Amount per <span id="amountLabel">Month (₹)</span></label>
-      <input id="amtNum" type="number" value="5000" min="0" class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
-      <input id="amtRng" type="range" min="0" max="100000" step="500" value="5000" class="mt-2 w-full" />
-    </div>
-    <div>
-      <label for="retNum" class="block text-sm font-medium text-gray-700">Annual Return (%)</label>
-      <input id="retNum" type="number" value="12" min="0" max="30" step="0.1" class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
-      <input id="retRng" type="range" min="0" max="30" step="0.1" value="12" class="mt-2 w-full" />
-    </div>
-    <div id="result" class="bg-emerald-100 p-4 rounded-lg text-gray-800 font-medium">
-      Invested: ₹0<br>
-      Estimated Value: ₹0<br>
-      Estimated Gain: ₹0
-    </div>
-  </section>
+<body class="bg-emerald-50 min-h-screen p-4">
+  <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white p-4">
+      <h1 class="text-2xl font-bold">SIP Investment Calculator</h1>
+      <p class="text-emerald-200 text-sm">Estimate SIP returns and track growth over time</p>
+    </header>
 
-  <!-- Output -->
-  <section class="lg:col-span-3">
-    <div class="border-b border-gray-200">
-      <nav class="flex -mb-px space-x-4">
-        <button data-tab="table" class="tab-btn py-3 px-6 text-lg font-medium text-emerald-600 border-b-2 border-emerald-600">Table</button>
-        <button data-tab="chart" class="tab-btn py-3 px-6 text-lg font-medium text-gray-500 hover:text-emerald-600 border-b-2 border-transparent">Chart</button>
-      </nav>
-    </div>
-    <div id="tab-content" class="pt-6">
-      <div id="table" class="tab-panel">
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-emerald-50">
-              <tr>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Period</th>
-                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Invested</th>
-                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Cumulative</th>
-                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Gain</th>
-                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Value</th>
-              </tr>
-            </thead>
-            <tbody id="dataTableBody" class="divide-y divide-gray-100"></tbody>
-          </table>
+    <!-- Main Content -->
+    <main class="p-4 grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <!-- Controls Section -->
+      <section class="lg:col-span-2 space-y-4">
+        <!-- Mode Toggle -->
+        <div class="flex rounded-lg overflow-hidden border border-gray-300">
+          <button id="btnMo" class="flex-1 py-2 px-4 bg-emerald-600 text-white font-medium text-sm">Monthly</button>
+          <button id="btnYr" class="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium text-sm">Yearly</button>
         </div>
-      </div>
-      <div id="chart" class="tab-panel hidden">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white p-4 rounded-lg shadow"><canvas id="barChart"></canvas></div>
-          <div class="bg-white p-4 rounded-lg shadow"><canvas id="pieChart"></canvas></div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
 
-  </div>  <script>
-    // DOM refs
-    const btnMo = document.getElementById('btnMo'),
-          btnYr = document.getElementById('btnYr'),
-          countNum = document.getElementById('countNum'), countRng = document.getElementById('countRng'),
-          amtNum = document.getElementById('amtNum'), amtRng = document.getElementById('amtRng'),
-          retNum = document.getElementById('retNum'), retRng = document.getElementById('retRng'),
-          countLabel = document.getElementById('countLabel'), amountLabel = document.getElementById('amountLabel'),
-          resultDiv = document.getElementById('result'), dataBody = document.getElementById('dataTableBody');
+        <!-- Input Controls -->
+        <div class="space-y-3">
+          <div>
+            <label for="countNum" class="block text-xs font-medium text-gray-700 mb-1">
+              # of <span id="countLabel">Months</span>
+            </label>
+            <input id="countNum" type="number" value="120" min="1" max="360" 
+                   class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            <input id="countRng" type="range" min="1" max="360" value="120" 
+                   class="w-full mt-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+          </div>
+
+          <div>
+            <label for="amtNum" class="block text-xs font-medium text-gray-700 mb-1">
+              Amount per <span id="amountLabel">Month</span> (₹)
+            </label>
+            <input id="amtNum" type="number" value="5000" min="0" step="500"
+                   class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            <input id="amtRng" type="range" min="0" max="100000" step="500" value="5000" 
+                   class="w-full mt-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+          </div>
+
+          <div>
+            <label for="retNum" class="block text-xs font-medium text-gray-700 mb-1">
+              Annual Return (%)
+            </label>
+            <input id="retNum" type="number" value="12" min="0" max="30" step="0.1"
+                   class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            <input id="retRng" type="range" min="0" max="30" step="0.1" value="12" 
+                   class="w-full mt-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+          </div>
+        </div>
+
+        <!-- Result Display -->
+        <div id="result" class="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+          <div class="text-sm text-gray-700 space-y-1">
+            <div>Invested: <span class="font-semibold text-emerald-700">₹0</span></div>
+            <div>Estimated Value: <span class="font-semibold text-emerald-700">₹0</span></div>
+            <div>Estimated Gain: <span class="font-semibold text-emerald-700">₹0</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts and Table Section -->
+      <section class="lg:col-span-3">
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200 mb-4">
+          <nav class="flex space-x-6">
+            <button data-tab="table" class="tab-btn py-2 px-1 text-sm font-medium text-emerald-600 border-b-2 border-emerald-600">
+              Table View
+            </button>
+            <button data-tab="charts" class="tab-btn py-2 px-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-emerald-600">
+              Charts View
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content">
+          <!-- Table Tab -->
+          <div id="table" class="tab-panel">
+            <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 max-h-96">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-emerald-50 sticky top-0">
+                  <tr>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Period</th>
+                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Investment</th>
+                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Cumulative</th>
+                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Period Return</th>
+                    <th class="px-3 py-2 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Total Value</th>
+                  </tr>
+                </thead>
+                <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Charts Tab -->
+          <div id="charts" class="tab-panel hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white p-3 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Investment vs Returns</h3>
+                <canvas id="barChart" class="w-full h-64"></canvas>
+              </div>
+              <div class="bg-white p-3 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Investment Breakdown</h3>
+                <canvas id="pieChart" class="w-full h-64"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // DOM elements
+    const btnMo = document.getElementById('btnMo');
+    const btnYr = document.getElementById('btnYr');
+    const countNum = document.getElementById('countNum');
+    const countRng = document.getElementById('countRng');
+    const amtNum = document.getElementById('amtNum');
+    const amtRng = document.getElementById('amtRng');
+    const retNum = document.getElementById('retNum');
+    const retRng = document.getElementById('retRng');
+    const countLabel = document.getElementById('countLabel');
+    const amountLabel = document.getElementById('amountLabel');
+    const resultDiv = document.getElementById('result');
+    const dataBody = document.getElementById('dataTableBody');
+    
     let mode = 'mo';
+    let barChart, pieChart;
 
-    // Setup charts
-    const barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
-      type: 'bar', data: { labels: [], datasets: [
-        { label: 'Invested', data: [], backgroundColor: 'rgba(4,120,87,0.8)' },
-        { label: 'Gain', data: [], backgroundColor: 'rgba(217,119,6,0.8)' }
-      ]}, options: { responsive: true, scales: { y: { beginAtZero: true, title: { display: true, text: 'Amount (₹)' } } }}
-    });
-    const pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
-      type: 'pie', data: { labels: ['Invested','Gain'], datasets:[{ data:[], backgroundColor:['#047857','#d97706'] }]}, options:{ responsive:true }
-    });
+    // Initialize charts
+    function initCharts() {
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Invested Amount',
+              data: [],
+              backgroundColor: 'rgba(5, 150, 105, 0.8)',
+              borderColor: 'rgba(5, 150, 105, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Returns',
+              data: [],
+              backgroundColor: 'rgba(245, 158, 11, 0.8)',
+              borderColor: 'rgba(245, 158, 11, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (₹)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          }
+        }
+      });
 
-    function syncInputs(num, rng) {
-      rng.addEventListener('input', ()=>{ num.value=rng.value; calculate(); });
-      num.addEventListener('input', ()=>{ rng.value=num.value; calculate(); });
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      pieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Total Invested', 'Total Returns'],
+          datasets: [{
+            data: [],
+            backgroundColor: [
+              'rgba(5, 150, 105, 0.8)',
+              'rgba(245, 158, 11, 0.8)'
+            ],
+            borderColor: [
+              'rgba(5, 150, 105, 1)',
+              'rgba(245, 158, 11, 1)'
+            ],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          }
+        }
+      });
     }
-    [[countNum,countRng],[amtNum,amtRng],[retNum,retRng]].forEach(syncInputs);
+
+    // Sync inputs
+    function syncInputs() {
+      // Count sync
+      countRng.addEventListener('input', () => {
+        countNum.value = countRng.value;
+        calculate();
+      });
+      countNum.addEventListener('input', () => {
+        countRng.value = countNum.value;
+        calculate();
+      });
+
+      // Amount sync
+      amtRng.addEventListener('input', () => {
+        amtNum.value = amtRng.value;
+        calculate();
+      });
+      amtNum.addEventListener('input', () => {
+        amtRng.value = amtNum.value;
+        calculate();
+      });
+
+      // Return sync
+      retRng.addEventListener('input', () => {
+        retNum.value = retRng.value;
+        calculate();
+      });
+      retNum.addEventListener('input', () => {
+        retRng.value = retNum.value;
+        calculate();
+      });
+    }
 
     // Mode toggle
-    btnMo.addEventListener('click', ()=>{ if(mode==='yr'){ mode='mo'; toggleMode(); }});
-    btnYr.addEventListener('click', ()=>{ if(mode==='mo'){ mode='yr'; toggleMode(); }});
-
-    function toggleMode(){
-      const isMo = mode==='mo';
-      btnMo.classList.toggle('bg-yellow-500',isMo);
-      btnMo.classList.toggle('bg-white',!isMo);
-      btnYr.classList.toggle('bg-yellow-500',!isMo);
-      btnYr.classList.toggle('bg-white',isMo);
-
-      if(isMo){ countRng.max=360; countNum.max=360; countLabel.textContent='Months'; amountLabel.textContent='Month (₹)'; }
-      else{ countRng.max=50; countNum.max=50; countLabel.textContent='Years'; amountLabel.textContent='Year (₹)'; }
-      calculate();
-    }
-
-    function calculate(){
-      const periods = +countRng.value,
-            amt = +amtRng.value,
-            rate = +retRng.value/100/(mode==='mo'?12:1),
-            investedArr=[], gainArr=[], labels=[];
-      let balance=0;
-      for(let i=1;i<=periods;i++){
-        balance = (balance+amt)*(1+rate);
-        investedArr.push(amt*i);
-        gainArr.push(Math.floor(balance-amt*i));
-        labels.push(mode==='mo'?i+' mo':i+' yr');
+    btnMo.addEventListener('click', () => {
+      if (mode !== 'mo') {
+        mode = 'mo';
+        btnMo.className = 'flex-1 py-2 px-4 bg-emerald-600 text-white font-medium text-sm';
+        btnYr.className = 'flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium text-sm';
+        
+        countRng.max = 360;
+        countNum.max = 360;
+        countLabel.textContent = 'Months';
+        amountLabel.textContent = 'Month';
+        
+        // Convert from yearly to monthly
+        const years = parseInt(countNum.value);
+        const months = Math.min(years * 12, 360);
+        countNum.value = months;
+        countRng.value = months;
+        
+        const yearlyAmt = parseInt(amtNum.value);
+        const monthlyAmt = Math.round(yearlyAmt / 12);
+        amtNum.value = monthlyAmt;
+        amtRng.value = monthlyAmt;
+        
+        calculate();
       }
-      // Update result
-      const totalInv=amt*periods, totalVal=balance, totalGain=totalVal-totalInv;
-      resultDiv.innerHTML=`Invested: ₹${totalInv.toLocaleString()}<br>Estimated Value: ₹${Math.floor(totalVal).toLocaleString()}<br>Gain: ₹${Math.floor(totalGain).toLocaleString()}`;
-      // Update table
-      dataBody.innerHTML=''; balance=0;
-      for(let i=1;i<=periods;i++){ balance=(balance+amt)*(1+rate); const row=dataBody.insertRow(); [labels[i-1],`₹${amt}`,`₹${amt*i}`,`₹${Math.floor((balance-amt*i)- (gainArr[i-1]-Math.floor((balance-amt*i)-gainArr[i-1])))}`,`₹${Math.floor(balance)}`].forEach(txt=>{const cell=row.insertCell(); cell.textContent=txt; cell.className='px-2 py-1 text-center text-sm'; }); }
-      // Update charts
-      barChart.data.labels=labels; barChart.data.datasets[0].data=investedArr; barChart.data.datasets[1].data=gainArr; barChart.update();
-      pieChart.data.datasets[0].data=[totalInv,totalGain]; pieChart.update();
-    }
-    // Tabs
-    document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.replace('text-emerald-600','text-gray-500') ); btn.classList.replace('text-gray-500','text-emerald-600'); panels=document.querySelectorAll('.tab-panel'); panels.forEach(p=>p.classList.add('hidden')); document.getElementById(btn.dataset.tab).classList.remove('hidden'); }));
+    });
 
-    // Init
-    toggleMode();
-  </script></body>
+    btnYr.addEventListener('click', () => {
+      if (mode !== 'yr') {
+        mode = 'yr';
+        btnYr.className = 'flex-1 py-2 px-4 bg-emerald-600 text-white font-medium text-sm';
+        btnMo.className = 'flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium text-sm';
+        
+        countRng.max = 50;
+        countNum.max = 50;
+        countLabel.textContent = 'Years';
+        amountLabel.textContent = 'Year';
+        
+        // Convert from monthly to yearly
+        const months = parseInt(countNum.value);
+        const years = Math.ceil(months / 12);
+        countNum.value = years;
+        countRng.value = years;
+        
+        const monthlyAmt = parseInt(amtNum.value);
+        const yearlyAmt = monthlyAmt * 12;
+        amtNum.value = yearlyAmt;
+        amtRng.value = yearlyAmt;
+        
+        calculate();
+      }
+    });
+
+    // Calculate SIP
+    function calculate() {
+      const periods = parseInt(countNum.value);
+      const amount = parseInt(amtNum.value);
+      const annualRate = parseFloat(retNum.value);
+      const periodicRate = annualRate / 100 / (mode === 'mo' ? 12 : 1);
+      
+      if (periods <= 0 || amount <= 0 || annualRate < 0) {
+        updateResult(0, 0, 0);
+        return;
+      }
+      
+      const labels = [];
+      const investedData = [];
+      const returnData = [];
+      let balance = 0;
+      let totalInvested = 0;
+      
+      // Calculate for each period
+      for (let i = 1; i <= periods; i++) {
+        balance = (balance + amount) * (1 + periodicRate);
+        totalInvested = amount * i;
+        const totalReturn = balance - totalInvested;
+        
+        labels.push(mode === 'mo' ? `${i}M` : `${i}Y`);
+        investedData.push(totalInvested);
+        returnData.push(Math.max(0, totalReturn));
+      }
+      
+      // Update result display
+      updateResult(totalInvested, balance, balance - totalInvested);
+      
+      // Update charts
+      updateCharts(labels, investedData, returnData, totalInvested, balance - totalInvested);
+      
+      // Update table
+      updateTable(periods, amount, periodicRate);
+    }
+
+    function updateResult(invested, value, gain) {
+      resultDiv.innerHTML = `
+        <div class="text-sm text-gray-700 space-y-1">
+          <div>Invested: <span class="font-semibold text-emerald-700">₹${Math.floor(invested).toLocaleString('en-IN')}</span></div>
+          <div>Estimated Value: <span class="font-semibold text-emerald-700">₹${Math.floor(value).toLocaleString('en-IN')}</span></div>
+          <div>Estimated Gain: <span class="font-semibold text-emerald-700">₹${Math.floor(gain).toLocaleString('en-IN')}</span></div>
+        </div>
+      `;
+    }
+
+    function updateCharts(labels, investedData, returnData, totalInvested, totalReturn) {
+      barChart.data.labels = labels;
+      barChart.data.datasets[0].data = investedData;
+      barChart.data.datasets[1].data = returnData;
+      barChart.update();
+
+      pieChart.data.datasets[0].data = [totalInvested, Math.max(0, totalReturn)];
+      pieChart.update();
+    }
+
+    function updateTable(periods, amount, periodicRate) {
+      dataBody.innerHTML = '';
+      let balance = 0;
+      let firstBreakeven = true;
+      
+      for (let i = 1; i <= periods; i++) {
+        const prevBalance = balance;
+        balance = (balance + amount) * (1 + periodicRate);
+        
+        const totalInvested = amount * i;
+        const periodReturn = balance - prevBalance - amount;
+        
+        const row = dataBody.insertRow();
+        
+        // Highlight breakeven point
+        if (firstBreakeven && periodReturn >= amount) {
+          row.className = 'bg-yellow-50 font-medium';
+          firstBreakeven = false;
+        }
+        
+        row.innerHTML = `
+          <td class="px-3 py-2 text-sm text-gray-900">${mode === 'mo' ? i + ' mo' : i + ' yr'}</td>
+          <td class="px-3 py-2 text-sm text-gray-900 text-right">₹${amount.toLocaleString('en-IN')}</td>
+          <td class="px-3 py-2 text-sm text-gray-900 text-right">₹${totalInvested.toLocaleString('en-IN')}</td>
+          <td class="px-3 py-2 text-sm text-gray-900 text-right">₹${Math.floor(periodReturn).toLocaleString('en-IN')}</td>
+          <td class="px-3 py-2 text-sm text-gray-900 text-right">₹${Math.floor(balance).toLocaleString('en-IN')}</td>
+        `;
+      }
+    }
+
+    // Tab functionality
+    function initTabs() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabPanels = document.querySelectorAll('.tab-panel');
+      
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetTab = btn.dataset.tab;
+          
+          // Update button styles
+          tabBtns.forEach(b => {
+            b.className = 'tab-btn py-2 px-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-emerald-600';
+          });
+          btn.className = 'tab-btn py-2 px-1 text-sm font-medium text-emerald-600 border-b-2 border-emerald-600';
+          
+          // Show/hide panels
+          tabPanels.forEach(panel => {
+            panel.classList.add('hidden');
+          });
+          document.getElementById(targetTab).classList.remove('hidden');
+        });
+      });
+    }
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+      syncInputs();
+      initTabs();
+      calculate();
+    });
+  </script>
+</body>
 </html>
